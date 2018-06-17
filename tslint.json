@@ -1,0 +1,53 @@
+/**
+ * This starter project recommended using Microsoft TSLint rules.
+ * Please see https://github.com/Microsoft/tslint-microsoft-contrib for more details.
+ */
+
+{
+  "extends": [
+    "tslint-microsoft-contrib"
+  ],
+  "rules": {
+    "mocha-no-side-effect-code": false,
+    "no-console": false,
+    "no-useless-files": false,
+    "prefer-for-of": false,
+    "function-name": false,
+    "no-submodule-imports": false,
+    "no-object-literal-type-assertion": false, // TO DO: Get rid of this after TS supports generic spread operator
+    "prefer-array-literal": false,
+    "align": false,
+    "no-suspicious-comments": false,
+    "no-unnecessary-callback-wrapper": false,
+    "variable-name": false,
+    "one-line": false,
+    "no-increment-decrement": false,
+    "prefer-template": false,
+    "semicolon": false,
+    "ordered-imports": false,
+    "no-trailing-whitespace": false,
+    "interface-name": false,
+    "newline-before-return": false,
+    "missing-jsdoc": false,
+    "no-relative-imports": false,
+    "export-name": false,
+    "promise-function-async": false,
+    "no-void-expression": false,
+    "no-redundant-jsdoc": false,
+    "prefer-type-cast": false,
+    "trailing-comma": [
+      true,
+      {
+        "multiline": "always",
+        "singleline": "never"
+      }
+    ],
+    "typedef": [
+      true,
+      "parameter",
+      "arrow-parameter",
+      "property-declaration",
+      "member-variable-declaration"
+    ]
+  }
+}
