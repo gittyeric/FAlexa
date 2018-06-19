@@ -21,7 +21,7 @@ export const defaultCmdDescription = (cmd: RunnableCmd<ParamMap>): string => {
         cmd.cmd.describe(cmd.runParams) : (
             'Run with ' +
             Object.keys(cmd.runParams)
-                .map((paramName: string, pi: number) => 
+                .map((paramName: string) => 
                     `${paramNameToPhrase(paramName)} as ${cmd.runParams[paramName]}`)
                 .join(' ')
         )

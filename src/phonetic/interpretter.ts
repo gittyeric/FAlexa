@@ -4,7 +4,7 @@ import { RunnableCmd, DirectiveInterpretation, DirectiveInterpretations} from '.
 import { trimd } from './sort';
 import { filterFirstStopwords, txtToValidWords } from './text';
 import { createClarificationResponse, defaultCmdDescription } from './interactSkills';
-import cloneDeep from 'lodash/cloneDeep'
+import { cloneDeep } from 'lodash';
 
 export type SyntaxInterpretation<P extends ParamMap> = DirectiveInterpretations<P>
 export type SyntaxInterpretations<P extends ParamMap> = SyntaxInterpretation<P>[]

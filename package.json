@@ -1,7 +1,7 @@
 {
-  "name": "node-typescript-boilerplate",
+  "name": "FAlexa",
   "version": "0.1.0",
-  "description": "A project that fuzzy parses order-based verbal commands in the browser, F-Alexa!",
+  "description": "Create your own verbal commands that map to custom Javascript functions",
   "engineStrict": true,
   "engines": {
     "node": ">= 8.9.0"
@@ -16,11 +16,15 @@
     "tslint": "~5.9.1",
     "tslint-microsoft-contrib": "~5.0.3",
     "tsutils": "~2.26.2",
-    "typescript": "~2.8.3"
+    "typescript": "~2.8.3",
+    "uglifyjs": "^2.4.11"
   },
   "scripts": {
-    "clean": "rimraf coverage build tmp",
-    "build": "tsc -p tsconfig.release.json",
+    "clean": "rimraf coverage build tmp dist",
+    "build": "npm run build:ts && npm run build:browserify && npm run build:min",
+    "build:ts": "tsc -p tsconfig.release.json",
+    "build:browserify": "cd ./build && browserify ./src/index.js -o ../dist/falexa.js",
+    "build:min": "uglifyjs ./dist/falexa.js -o ./dist/falexa.min.js --compress",
     "watch": "tsc -w -p tsconfig.release.json",
     "lint": "tslint -t stylish --project \"tsconfig.json\"",
     "pretest": "npm run lint",
@@ -37,6 +41,7 @@
     "metaphone": "^1.0.3",
     "talisman": "^0.20.0",
     "tslib": "~1.9.0",
-    "words-to-numbers": "^1.4.1"
+    "words-to-numbers": "^1.4.1",
+    "uglify-es": "^3.3.9"
   }
 }

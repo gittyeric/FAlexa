@@ -19,18 +19,18 @@ const newRecognizerFactory =
     // tslint:disable-next-line:no-require-imports no-unsafe-any no-any
     (<(source: SentenceSource) => (handler: SentencesHandler) => SentenceSource> require('./io/recognition').newRecognizerFactory)
 // tslint:disable-next-line:no-require-imports no-any no-unsafe-any
-const getDefaultRecognition = (<() => SentenceSource> require('./io/recognition').getDefaultRecognition)
+const getDefaultRecognition = (<() => SentenceSource> require('./io/recognition').getDefaultRecognition);
+
+const sentenceHandlerFactory = (interpretter: Interpretter, speaker: Speaker) => (sentencePossibilities: string[]) => {
+    const interpretted = interpretter.interpret(sentencePossibilities[0])
+    speaker(interpretted.getOutputMessage())
+}
 
 export interface FAlexa {
     speak(toSay: string): void,
     hear(sentencePossibilities: string[]): void,
     startListening(): void,
     stopListening(): void,
-}
-
-const sentenceHandlerFactory = (interpretter: Interpretter, speaker: Speaker) => (sentencePossibilities: string[]) => {
-    const interpretted = interpretter.interpret(sentencePossibilities[0])
-    speaker(interpretted.getOutputMessage())
 }
 
 export const falexa = (cmds: Cmd<ParamMap>[],

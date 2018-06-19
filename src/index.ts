@@ -1,7 +1,7 @@
 import * as speech from './io/speech';
 import * as recognition from './io/recognition';
-import * as notes from './examples/note/cmd';
-import * as timers from './examples/timer/cmd';
+import * as notes from './phonetic/examples/note/cmd';
+import * as timers from './phonetic/examples/timer/cmd';
 
 export const Speech = speech
 export const Recognition = recognition

@@ -8,7 +8,7 @@ export interface Log {
 export interface Logger {
     log(note: string): void,
     recentLogs(count: number): Log[],
-    popLastLog(): Log | null,
+    popLastLog(): Log | undefined,
 }
 
 export const newLogger = (): Logger => {
