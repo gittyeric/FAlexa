@@ -26,8 +26,12 @@ export const newRecognizerFactory = (recognition = getDefaultRecognition()) => {
             const sentences = [];
             for (const i in event.results[0]) {
                 sentences.push(event.results[0][i].transcript);
+                console.log(`Got ${event.results[0][i].transcript}`)
             }
             incomingSentencesHandler(sentences.filter(s => !!s));
+
+            // Always retrigger listener
+            recognition.start()
         }
 
         const startListening = () => {

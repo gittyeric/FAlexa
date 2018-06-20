@@ -1,4 +1,4 @@
-import { newInterpretter, Interpretter } from './phonetic/interpretter'
+import { newInterpretter } from './phonetic/interpretter'
 import { ParamMap, Cmd } from '.';
 
 type Speaker = (toSay: string) => void
@@ -21,11 +21,6 @@ const newRecognizerFactory =
 // tslint:disable-next-line:no-require-imports no-any no-unsafe-any
 const getDefaultRecognition = (<() => SentenceSource> require('./io/recognition').getDefaultRecognition);
 
-const sentenceHandlerFactory = (interpretter: Interpretter, speaker: Speaker) => (sentencePossibilities: string[]) => {
-    const interpretted = interpretter.interpret(sentencePossibilities[0])
-    speaker(interpretted.getOutputMessage())
-}
-
 export interface FAlexa {
     speak(toSay: string): void,
     hear(sentencePossibilities: string[]): void,
@@ -34,19 +29,26 @@ export interface FAlexa {
 }
 
 export const falexa = (cmds: Cmd<ParamMap>[],
-    speaker: (toSay: string) => void 
-        = defaultSpeaker(),
+    speaker: (toSay: string) => void = defaultSpeaker(),
     // tslint:disable-next-line:no-any
-    sentenceSource: SentenceSource = getDefaultRecognition()): FAlexa => {
+    sentenceSource: SentenceSource = getDefaultRecognition(),
+    debugLogger: (msg: string) => void = console.log): FAlexa => {
 
     // Setup interpretter
-    const interpretter = newInterpretter(cmds)
+    let interpretter = newInterpretter(cmds)
 
     // Setup voice recognition
-    const sentenceHandler: SentencesHandler = sentenceHandlerFactory(interpretter, speaker)
+    const sentenceHandler: SentencesHandler = (sentencePossibilities: string[]) => {
+        debugLogger(`Heard '${sentencePossibilities[0]}'`)
+        interpretter = interpretter.interpret(sentencePossibilities[0])
+        debugLogger(`"${interpretter.getOutputMessage()}"`)
+        speaker(interpretter.getOutputMessage())
+    }
     const recognizer = newRecognizerFactory(sentenceSource)(sentenceHandler)
+
     return {
         speak(toSay: string): void {
+            debugLogger(`"${toSay}"`)
             speaker(toSay)
         },
         hear(sentences: string[]): void {

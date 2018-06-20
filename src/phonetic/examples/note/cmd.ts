@@ -3,6 +3,9 @@ import { Any, Require, Var, StopPhrase, Numeric, Sentence, createCmd,
     GetAny, Ignore, Option, createCmdMatchSettings } from '../..';
 import { Log, Notes, Logger } from './skills';
 
+// Export Skills
+export * from './skills';
+
 // Cmd run parameter types
 export interface SaveNoteParams extends ParamMap { 
     name: string, 

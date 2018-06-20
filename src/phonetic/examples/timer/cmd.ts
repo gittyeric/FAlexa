@@ -7,6 +7,9 @@ import { Var, Require, Any, StopPhrase, Numeric } from '../../syntax';
 import { Cmd, ParamMap } from '../../publicInterfaces';
 import { createCmd } from '../../';
 
+// Export Skills
+export * from './skills';
+
 // Convert time unit synonyms
 interface TimeUnitTranslater { [index: string]: string }
 const timeUnitTranslator = {
@@ -40,7 +43,7 @@ const createStartTimerCmd = (): Cmd<TimerStartParams> => {
 
     const runFunc = ({ name, duration, timeUnit }: TimerStartParams) => {
         let multiplier = 1000
-        const unit: string = timeUnitTranslator[timeUnit] ? timeUnitTranslator[timeUnit] as string : timeUnit
+        const unit: string = timeUnitTranslator[timeUnit] !== undefined ? timeUnitTranslator[timeUnit] : timeUnit
         if (unit.startsWith('min')) {
             multiplier *= 60
         }

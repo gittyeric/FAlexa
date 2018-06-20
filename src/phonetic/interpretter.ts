@@ -290,10 +290,10 @@ export interface Interpretter {
 const _newInterpretter = (
     cmds: Cmd<ParamMap>[], 
     prioritizedCmds: Cmd<ParamMap>[] = [], 
-    interpretation: CmdResponse | null = null): Interpretter => ({
+    interpretation?: CmdResponse): Interpretter => ({
 
         getOutputMessage(): string {
-            if (interpretation === null) {
+            if (interpretation === undefined) {
                 return ''
             }
             return interpretation.outputMessage === undefined ? '' : interpretation.outputMessage

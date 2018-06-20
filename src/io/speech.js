@@ -13,7 +13,7 @@ const speak = (synth, txt, { voice, pitch, rate }) => {
 
 export const getDefaultVoice = () => {
     const voices = synth.getVoices();
-    return synth.getVoices()[voices.length - 1];
+    return synth.getVoices()[0] // voices.length - 1];
 }
 
 export const speakerFactory = (voice, pitch, rate) =>
