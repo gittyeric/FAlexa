@@ -6,6 +6,7 @@ export const getDefaultRecognition = () => {
     recognition.lang = 'en-US';
     recognition.interimResults = false;
     recognition.maxAlternatives = 3;
+    recognition.continuous = true;
 
     return recognition;
 }
@@ -29,9 +30,6 @@ export const newRecognizerFactory = (recognition = getDefaultRecognition()) => {
                 console.log(`Got ${event.results[0][i].transcript}`)
             }
             incomingSentencesHandler(sentences.filter(s => !!s));
-
-            // Always retrigger listener
-            recognition.start()
         }
 
         const startListening = () => {

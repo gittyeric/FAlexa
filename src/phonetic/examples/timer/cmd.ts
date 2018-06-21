@@ -32,7 +32,7 @@ interface TimerNameParam extends ParamMap {
 
 const timerNames = ['timer', 'alarm', 'clock']
 
-const createStartTimerCmd = (): Cmd<TimerStartParams> => {
+const createStartTimerCmd = (alarm: (alertMsg: string) => void): Cmd<TimerStartParams> => {
     const syntax = [
         Require(Any(['start', 'set'])),
         Var('timerName', StopPhrase(timerNames)),
@@ -50,7 +50,8 @@ const createStartTimerCmd = (): Cmd<TimerStartParams> => {
         if (unit.startsWith('hour')) {
             multiplier *= 60 * 60
         }
-        startTimer(name, duration * multiplier);
+        startTimer(name, duration * multiplier, 
+            () => alarm(`timer ${name} ready, ${name}`) );
         return undefined
     }
 
@@ -76,7 +77,7 @@ const createStopTimerCmd = (): Cmd<TimerNameParam> => {
     )
 }
 
-export const createTimerCmds = (): Cmd<ParamMap>[] => [
-    createStartTimerCmd(),
+export const createTimerCmds = (alarm: (alertMsg: string) => void): Cmd<ParamMap>[] => [
+    createStartTimerCmd(alarm),
     createStopTimerCmd(),
 ]
