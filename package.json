@@ -26,7 +26,7 @@
     "build:browserify": "cd ./build && browserify ./src/browser.js --standalone Falexa -o ../dist/falexa.browser.js",
     "build:min": "uglifyjs ./dist/falexa.browser.js -o ./dist/falexa.browser.min.js --compress",
     "deploy-dry": "npm run lint & npm run build && git status",
-    "deploy": "npm run deploy-dry && git add -A && git commit -m %1 && git push origin",
+    "deploy": "npm run deploy-dry && git add -A && git commit -m $1 && git push origin",
     "watch": "tsc -w -p tsconfig.release.json",
     "lint": "tslint -t stylish --project \"tsconfig.json\"",
     "pretest": "npm run lint",
