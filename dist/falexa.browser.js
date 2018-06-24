@@ -278,7 +278,7 @@ const timerNames = ['timer', 'alarm', 'clock'];
 const createStartTimerCmd = (alarm) => {
     const syntax = [
         syntax_1.Require(syntax_1.Any(['start', 'set'])),
-        syntax_1.Var('timerName', syntax_1.StopPhrase(timerNames)),
+        syntax_1.Var('name', syntax_1.StopPhrase(timerNames)),
         syntax_1.Require(syntax_1.Any(['for'])),
         syntax_1.Var('duration', syntax_1.Numeric()),
         syntax_1.Var('timeUnit', syntax_1.Any(['second', 'seconds', 'minute', 'minutes', 'hour', 'hours', 'our', 'ours'])),
@@ -308,7 +308,7 @@ const createStopTimerCmd = () => {
     const describe = ({ name }) => `${name} stopped`;
     return _1.createCmd([
         syntax_1.Require(syntax_1.Any(['stop', 'end'])),
-        syntax_1.Var('timerName', syntax_1.StopPhrase(timerNames)),
+        syntax_1.Var('name', syntax_1.StopPhrase(timerNames)),
     ], runFunc, describe);
 };
 exports.createTimerCmds = (alarm) => [
@@ -320,7 +320,7 @@ exports.createTimerCmds = (alarm) => [
 "use strict";
 const timers = {};
 const ensureStopped = (name) => {
-    timer = timers[name];
+    const timer = timers[name];
     if (timer) {
         clearTimeout(timer.ref);
         delete timers[name];
@@ -652,7 +652,7 @@ const createParsedNumber = (value, isNegative, consumed) => ({
     value: value * (isNegative ? -1 : 1),
     consumed,
 });
-exports.subWordsToNumberWithMutationAndBeer = (words) => {
+exports.wordsToNumberWithMutationAndBeer = (words) => {
     let isNegative = false;
     let curNumber = 0;
     let consumed = 0;
@@ -710,7 +710,7 @@ exports.wordsToNumberRecurse = (words, curNumber = NaN, numericPhrase = [], cons
     return exports.wordsToNumberRecurse(words.slice(1), newNumber, newNumericPhrase, consumed + 1, isNegative);
 };
 exports.wordsToParsedNumber = (words) => exports.wordsToNumberRecurse(words);
-exports.wordsToParsedNumberImperative = (words) => exports.subWordsToNumberWithMutationAndBeer(words);
+exports.wordsToParsedNumberImperative = (words) => exports.wordsToNumberWithMutationAndBeer(words);
 
 },{"util":94,"words-to-numbers":101}],14:[function(require,module,exports){
 "use strict";

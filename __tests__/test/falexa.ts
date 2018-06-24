@@ -1,6 +1,6 @@
-import { createNoteCmds, newNotes } from '../src/phonetic/examples/note/cmd';
-import { createMockFalexa } from '../src/test/falexaUtil';
-import { createCmd, Require, Any } from '../src';
+import { createNoteCmds, newNotes } from '../../src/phonetic/examples/note/cmd';
+import { createMockFalexa } from '../../src/test/falexaUtil';
+import { createCmd, Require, Any } from '../../src';
 
 const notes = newNotes()
 const cmds = [...createNoteCmds(notes)]
@@ -42,7 +42,6 @@ describe('FAlexa', () => {
         const hearSame = falexa.hear(['same'])
         expect(hearSame).toContain('save')
         expect(hearSame).toContain('sanity')
-        console.log(hearSame)
 
         falexa.hear(['1'])
         expect(calledSanity).toEqual(false)

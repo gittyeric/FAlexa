@@ -1,7 +1,7 @@
-import { newNotes, newLogger } from '../../../src/phonetic/examples/note/skills';
-import { createNoteCmds, createLogCmds } from '../../../src/phonetic/examples/note/cmd';
-import { newInterpretter } from '../../../src/phonetic/interpretter';
-import { ParamMap, Cmd } from '../../../src/phonetic/publicInterfaces';
+import { newNotes, newLogger } from '../../../../src/phonetic/examples/note/skills';
+import { createNoteCmds, createLogCmds } from '../../../../src/phonetic/examples/note/cmd';
+import { newInterpretter } from '../../../../src/phonetic/interpretter';
+import { ParamMap, Cmd } from '../../../../src/phonetic/publicInterfaces';
 
 const createNotesAndLoggerCmds = (): Cmd<ParamMap>[] => {
     const logger = newLogger()

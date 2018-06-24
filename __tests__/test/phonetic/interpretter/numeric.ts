@@ -1,6 +1,6 @@
-import { Var, Numeric, Any, Require } from '../../../src/phonetic';
-import { newInterpretter } from '../../../src/phonetic/interpretter';
-import { assertEqualCmd } from '../../../src/test/phonetic/cmdUtil';
+import { Var, Numeric, Any, Require } from '../../../../src/phonetic';
+import { newInterpretter } from '../../../../src/phonetic/interpretter';
+import { assertEqualCmd } from '../../../../src/test/phonetic/cmdUtil';
 
 describe('raw number interpretation', () => {
 

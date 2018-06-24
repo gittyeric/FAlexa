@@ -32,6 +32,7 @@
     "pretest": "npm run lint",
     "test": "npm run test-only",
     "test-only": "jest --coverage",
+    "benchmark": "jest --coverage --config jest.benchmark.config.js",
     "test:watch": "jest --watch"
   },
   "author": "Eric <git@letsmakeit.com>",

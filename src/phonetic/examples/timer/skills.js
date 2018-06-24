@@ -1,7 +1,7 @@
 const timers = {};
 
 const ensureStopped = (name) => {
-    timer = timers[name];
+    const timer = timers[name];
     if (timer) {
         clearTimeout(timer.ref);
         delete timers[name];

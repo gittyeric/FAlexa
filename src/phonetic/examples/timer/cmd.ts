@@ -35,7 +35,7 @@ const timerNames = ['timer', 'alarm', 'clock']
 const createStartTimerCmd = (alarm: (alertMsg: string) => void): Cmd<TimerStartParams> => {
     const syntax = [
         Require(Any(['start', 'set'])),
-        Var('timerName', StopPhrase(timerNames)),
+        Var('name', StopPhrase(timerNames)),
         Require(Any(['for'])),
         Var('duration', Numeric()),
         Var('timeUnit', Any(['second', 'seconds', 'minute', 'minutes', 'hour', 'hours', 'our', 'ours'])),
@@ -72,7 +72,7 @@ const createStopTimerCmd = (): Cmd<TimerNameParam> => {
 
     return createCmd<TimerNameParam>([
             Require(Any(['stop', 'end'])),
-            Var('timerName', StopPhrase(timerNames)),
+            Var('name', StopPhrase(timerNames)),
         ], runFunc, describe,
     )
 }

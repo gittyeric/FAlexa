@@ -26,7 +26,7 @@ const createParsedNumber = (value: number, isNegative: boolean, consumed: number
     consumed, 
 })
 
-export const subWordsToNumberWithMutationAndBeer = (words: string[]): ParsedNumber => {
+export const wordsToNumberWithMutationAndBeer = (words: string[]): ParsedNumber => {
     let isNegative = false
     let curNumber = 0
     let consumed = 0
@@ -100,4 +100,4 @@ export const wordsToNumberRecurse =
 
 export const wordsToParsedNumber = (words: string[]) => wordsToNumberRecurse(words)
 // For testing purposes
-export const wordsToParsedNumberImperative = (words: string[]) => subWordsToNumberWithMutationAndBeer(words)
+export const wordsToParsedNumberImperative = (words: string[]) => wordsToNumberWithMutationAndBeer(words)

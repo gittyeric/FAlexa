@@ -1,7 +1,7 @@
-import { Var, Any, Require, Sentence } from '../../../src/phonetic/syntax';
-import { newInterpretter } from '../../../src/phonetic/interpretter';
-import { createCmd } from '../../../src/phonetic/index';
-import { assertEqualCmd } from '../../../src/test/phonetic/cmdUtil';
+import { Var, Any, Require, Sentence } from '../../../../src/phonetic/syntax';
+import { newInterpretter } from '../../../../src/phonetic/interpretter';
+import { createCmd } from '../../../../src/phonetic/index';
+import { assertEqualCmd } from '../../../../src/test/phonetic/cmdUtil';
 
 // Contains tests assurring general fuzzy guarantees
 
