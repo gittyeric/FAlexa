@@ -91,7 +91,7 @@ const wordsToNumberRecurse =
     }
 
     const newPhrase = [...numericPhrase, word]
-    const newNumber = wordsToNumbers(newPhrase.join(' '))
+    const newNumber = Number(wordsToNumbers(newPhrase.join(' ')))
     if (!isNumber(newNumber) || newNumber < curNumber) {
         return createParsedNumber(curNumber, isNegative, consumed)
     }

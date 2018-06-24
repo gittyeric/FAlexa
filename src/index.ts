@@ -6,7 +6,7 @@ import * as timers from './phonetic/examples/timer/cmd';
 export const Speech = speech
 export const Recognition = recognition
 
-export { falexa } from './falexa';
+export { createFalexa } from './falexa';
 export { newInterpretter } from './phonetic/interpretter'
 export * from './phonetic'
 

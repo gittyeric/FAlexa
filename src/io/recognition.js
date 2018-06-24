@@ -1,4 +1,4 @@
-export const getDefaultRecognition = () => {
+const getDefaultRecognition = () => {
     const RecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new RecognitionClass();
 
@@ -13,7 +13,7 @@ export const getDefaultRecognition = () => {
 
 // Returns a function that, when called during a user mouse/keyboard event, will start voice recognition
 // incomingSentencesHandler will be called with an array of possible sentences whenever recognized
-export const newRecognizerFactory = (recognition = getDefaultRecognition()) => {
+const newRecognizerFactory = (recognition = getDefaultRecognition()) => {
     return (incomingSentencesHandler) => {
         const resultHandler = (event) => {
             // The SpeechRecognitionEvent results property returns a SpeechRecognitionResultList object
@@ -54,4 +54,9 @@ export const newRecognizerFactory = (recognition = getDefaultRecognition()) => {
             stopListening
         }
     }
+};
+
+module.exports = {
+    getDefaultRecognition,
+    newRecognizerFactory,
 };

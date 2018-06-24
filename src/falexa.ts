@@ -23,16 +23,16 @@ const getDefaultRecognition = (<() => SentenceSource> require('./io/recognition'
 
 export interface FAlexa {
     speak(toSay: string): void,
-    hear(sentencePossibilities: string[]): void,
+    hear(sentencePossibilities: string[]): string,
     startListening(): void,
     stopListening(): void,
 }
 
-export const falexa = (cmds: Cmd<ParamMap>[],
-    speaker: (toSay: string) => void = defaultSpeaker(),
+export const createFalexa = (cmds: Cmd<ParamMap>[],
+    speaker: (toSay: string) => void,
     // tslint:disable-next-line:no-any
-    sentenceSource: SentenceSource = getDefaultRecognition(),
-    debugLogger: (msg: string) => void = console.log): FAlexa => {
+    sentenceSource: SentenceSource,
+    debugLogger: (msg: string) => void): FAlexa => {
 
     // Setup interpretter
     let interpretter = newInterpretter(cmds)
@@ -51,8 +51,9 @@ export const falexa = (cmds: Cmd<ParamMap>[],
             debugLogger(`"${toSay}"`)
             speaker(toSay)
         },
-        hear(sentences: string[]): void {
+        hear(sentences: string[]): string {
             sentenceHandler(sentences)
+            return interpretter.getOutputMessage()
         },
         startListening(): void {
             recognizer.start()
@@ -61,4 +62,8 @@ export const falexa = (cmds: Cmd<ParamMap>[],
             recognizer.stop()
         },
     }
+}
+
+export const falexa = (cmds: Cmd<ParamMap>[]): FAlexa => {
+    return createFalexa(cmds, defaultSpeaker(), getDefaultRecognition(), console.log)
 }

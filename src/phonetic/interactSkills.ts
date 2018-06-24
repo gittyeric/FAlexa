@@ -30,7 +30,7 @@ export const defaultCmdDescription = (cmd: RunnableCmd<ParamMap>): string => {
 export function createMultichoiceResponse(possibleCmds: RunnableCmd<ParamMap>[]): CmdResponse {
     const question = 'did you mean ' +
         possibleCmds.map((cmd: RunnableCmd<ParamMap>, ci: number) =>
-            (`${ci}, ` + defaultCmdDescription(cmd))).join(' or ')
+            (`${ci + 1}, ` + defaultCmdDescription(cmd))).join(' or ')
         + '?'
 
     const clarifyCmd = createCmd<NumericResponseParams>(

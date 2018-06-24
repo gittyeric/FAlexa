@@ -8,7 +8,7 @@ import { Cmd, ParamMap } from '../../publicInterfaces';
 import { createCmd } from '../../';
 
 // Export Skills
-export * from './skills';
+export { startTimer, stopTimer } from './skills';
 
 // Convert time unit synonyms
 interface TimeUnitTranslater { [index: string]: string }

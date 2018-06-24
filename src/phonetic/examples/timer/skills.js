@@ -9,7 +9,7 @@ const ensureStopped = (name) => {
     return timer;
 }
 
-export const startTimer = (name, millis, callbackFunc) => {
+const startTimer = (name, millis, callbackFunc) => {
     ensureStopped(name);
     const now = (new Date()).getTime();
     const timer = {
@@ -20,7 +20,7 @@ export const startTimer = (name, millis, callbackFunc) => {
     timers[name] = timer;
 };
 
-export const stopTimer = (name) => {
+const stopTimer = (name) => {
     ensureStopped(name);
 };
 
@@ -35,3 +35,8 @@ export const stopTimer = (name) => {
 export const getTimerStats = () => {
     return Object.keys(timers).map(name => getSecsRemaining(name));
 };*/
+
+module.exports = {
+    startTimer,
+    stopTimer,
+};
