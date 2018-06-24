@@ -3,7 +3,7 @@ import { Filter, Directive,
 import { FilterInterpretation, FilterInterpretations, DirectiveInterpretation, DirectiveInterpretations } from './moduleInterfaces';
 import { matchWordsToPhrase, phoneticPhraseDistance } from './text';
 import { wordsToParsedNumber } from './numeric';
-import { isNumber, isNullOrUndefined } from 'util';
+import { isNullOrUndefined, isNumber } from 'util';
 import { trimf } from './sort';
 import { cloneDeep, flatten } from 'lodash';
 
@@ -237,7 +237,7 @@ const numericFilter = (minNumber: number = 0, maxNumber: number = Infinity, preF
         return preFilter(filteredInput).map((interpretation: FilterInterpretation) => {
             const parsedNumber = wordsToParsedNumber(interpretation.words)
 
-            if (isNumber(parsedNumber.value) && 
+            if (isFinite(parsedNumber.value) && 
                 parsedNumber.value >= minNumber && 
                 parsedNumber.value <= maxNumber) {
                 return {

@@ -53,6 +53,7 @@ exports.Speech = speech;
 exports.Recognition = recognition;
 var falexa_1 = require("./falexa");
 exports.createFalexa = falexa_1.createFalexa;
+exports.falexa = falexa_1.falexa;
 var interpretter_1 = require("./phonetic/interpretter");
 exports.newInterpretter = interpretter_1.newInterpretter;
 tslib_1.__exportStar(require("./phonetic"), exports);
@@ -76,9 +77,10 @@ const newRecognizerFactory = (recognition = getDefaultRecognition()) => {
     return (incomingSentencesHandler) => {
         const resultHandler = (event) => {
             const sentences = [];
-            for (const i in event.results[0]) {
-                sentences.push(event.results[0][i].transcript);
-                console.log(`Got ${event.results[0][i].transcript}`);
+            const curIndex = event.results.length - 1;
+            for (const i in event.results[curIndex]) {
+                sentences.push(event.results[curIndex][i].transcript);
+                console.log(`Got ${event.results[curIndex][i].transcript}`);
             }
             incomingSentencesHandler(sentences.filter(s => !!s));
         };
@@ -650,7 +652,7 @@ const createParsedNumber = (value, isNegative, consumed) => ({
     value: value * (isNegative ? -1 : 1),
     consumed,
 });
-const subWordsToNumberWithMutationAndBeer = (words) => {
+exports.subWordsToNumberWithMutationAndBeer = (words) => {
     let isNegative = false;
     let curNumber = 0;
     let consumed = 0;
@@ -675,7 +677,7 @@ const subWordsToNumberWithMutationAndBeer = (words) => {
             continue;
         }
         const newNumber = words_to_numbers_1.wordsToNumbers(numericPhrase.join(' '));
-        if (!util_1.isNumber(newNumber) || newNumber < curNumber) {
+        if (!util_1.isNumber(newNumber) || !isFinite(newNumber) || newNumber < curNumber) {
             numericPhrase.pop();
             break;
         }
@@ -683,32 +685,32 @@ const subWordsToNumberWithMutationAndBeer = (words) => {
     }
     return createParsedNumber(curNumber, isNegative, consumed);
 };
-const wordsToNumberRecurse = (words, curNumber = NaN, numericPhrase = [], consumed = 0, isNegative = false) => {
+exports.wordsToNumberRecurse = (words, curNumber = NaN, numericPhrase = [], consumed = 0, isNegative = false) => {
     if (words.length === 0) {
         return createParsedNumber(curNumber, isNegative, consumed);
     }
     const word = numericSynonymMap[words[0]] === undefined ? words[0] : numericSynonymMap[words[0]];
     if (word === 'zero' && (consumed === 0 || curNumber === 0)) {
-        return wordsToNumberRecurse(words.slice(1), 0, numericPhrase, consumed + 1, isNegative);
+        return exports.wordsToNumberRecurse(words.slice(1), 0, numericPhrase, consumed + 1, isNegative);
     }
     if (numericStopwords[word] !== undefined) {
-        return wordsToNumberRecurse(words.slice(1), curNumber, numericPhrase, consumed + 1, isNegative);
+        return exports.wordsToNumberRecurse(words.slice(1), curNumber, numericPhrase, consumed + 1, isNegative);
     }
     if (negativeSynonyms[word] !== undefined && consumed === 0) {
-        return wordsToNumberRecurse(words.slice(1), curNumber, numericPhrase, consumed + 1, true);
+        return exports.wordsToNumberRecurse(words.slice(1), curNumber, numericPhrase, consumed + 1, true);
     }
     if (dotSynonyms[word] !== undefined && consumed + 1 < words.length) {
-        return wordsToNumberRecurse(words.slice(1), curNumber, [...numericPhrase, 'point'], consumed + 1, isNegative);
+        return exports.wordsToNumberRecurse(words.slice(1), curNumber, [...numericPhrase, 'point'], consumed + 1, isNegative);
     }
-    const newPhrase = [...numericPhrase, word];
-    const newNumber = Number(words_to_numbers_1.wordsToNumbers(newPhrase.join(' ')));
-    if (!util_1.isNumber(newNumber) || newNumber < curNumber) {
+    const newNumericPhrase = [...numericPhrase, word];
+    const newNumber = Number(words_to_numbers_1.wordsToNumbers(newNumericPhrase.join(' ')));
+    if (!util_1.isNumber(newNumber) || !isFinite(newNumber) || newNumber < curNumber) {
         return createParsedNumber(curNumber, isNegative, consumed);
     }
-    return wordsToNumberRecurse(words.slice(1), newNumber, newPhrase, consumed + 1, isNegative);
+    return exports.wordsToNumberRecurse(words.slice(1), newNumber, newNumericPhrase, consumed + 1, isNegative);
 };
-exports.wordsToParsedNumber = (words) => wordsToNumberRecurse(words);
-exports.wordsToParsedNumberImperative = (words) => subWordsToNumberWithMutationAndBeer(words);
+exports.wordsToParsedNumber = (words) => exports.wordsToNumberRecurse(words);
+exports.wordsToParsedNumberImperative = (words) => exports.subWordsToNumberWithMutationAndBeer(words);
 
 },{"util":94,"words-to-numbers":101}],14:[function(require,module,exports){
 "use strict";
@@ -902,7 +904,7 @@ const lazyNoneFilter = (phraseBlacklistGenerator, preFilter) => (filteredInput) 
 const numericFilter = (minNumber = 0, maxNumber = Infinity, preFilter) => (filteredInput) => {
     return preFilter(filteredInput).map((interpretation) => {
         const parsedNumber = numeric_1.wordsToParsedNumber(interpretation.words);
-        if (util_1.isNumber(parsedNumber.value) &&
+        if (isFinite(parsedNumber.value) &&
             parsedNumber.value >= minNumber &&
             parsedNumber.value <= maxNumber) {
             return Object.assign({}, interpretation, { words: [`${parsedNumber.value}`], consumed: (interpretation.consumed + parsedNumber.consumed), varType: publicInterfaces_1.VarType.Numeric });

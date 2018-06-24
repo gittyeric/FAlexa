@@ -44,6 +44,11 @@ describe('logs', () => {
         expect(listInterpretation.getOutputMessage()).
             toContain('like turtles')
 
+        const listXInterpretation = interpretation.interpret(
+            'list last 5 logs')
+        expect(listXInterpretation.getOutputMessage()).
+            toContain('like turtles')
+
         const popInterpretation = interpretation.interpret(
             'clear log')
         expect(popInterpretation.getOutputMessage()).

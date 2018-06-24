@@ -25,9 +25,10 @@ const newRecognizerFactory = (recognition = getDefaultRecognition()) => {
             // The second [0] returns the SpeechRecognitionAlternative at position 0.
             // We then return the transcript property of the SpeechRecognitionAlternative object
             const sentences = [];
-            for (const i in event.results[0]) {
-                sentences.push(event.results[0][i].transcript);
-                console.log(`Got ${event.results[0][i].transcript}`)
+            const curIndex = event.results.length - 1;
+            for (const i in event.results[curIndex]) {
+                sentences.push(event.results[curIndex][i].transcript);
+                console.log(`Got ${event.results[curIndex][i].transcript}`)
             }
             incomingSentencesHandler(sentences.filter(s => !!s));
         }

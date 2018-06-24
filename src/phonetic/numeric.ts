@@ -1,6 +1,6 @@
 import { wordsToNumbers } from 'words-to-numbers';
-// import { stopwords } from '../stopwords';
 import { isNumber } from 'util';
+// import { stopwords } from '../stopwords';
 
 interface SynonymMap {
     [index: string]: string
@@ -26,7 +26,7 @@ const createParsedNumber = (value: number, isNegative: boolean, consumed: number
     consumed, 
 })
 
-const subWordsToNumberWithMutationAndBeer = (words: string[]): ParsedNumber => {
+export const subWordsToNumberWithMutationAndBeer = (words: string[]): ParsedNumber => {
     let isNegative = false
     let curNumber = 0
     let consumed = 0
@@ -55,7 +55,7 @@ const subWordsToNumberWithMutationAndBeer = (words: string[]): ParsedNumber => {
         }
 
         const newNumber = wordsToNumbers(numericPhrase.join(' '))
-        if (!isNumber(newNumber) || newNumber < curNumber) {
+        if (!isNumber(newNumber) || !isFinite(newNumber) || newNumber < curNumber) {
             numericPhrase.pop()
             break
         }
@@ -67,7 +67,7 @@ const subWordsToNumberWithMutationAndBeer = (words: string[]): ParsedNumber => {
 
 // Let's compare a tail-end recursion optimized (but with slower immutable copy)
 // to the explicit loop version above!
-const wordsToNumberRecurse = 
+export const wordsToNumberRecurse = 
     (words: string[], 
     curNumber: number = NaN, numericPhrase: string[] = [], consumed: number = 0, isNegative: boolean = false): ParsedNumber => {
     
@@ -90,12 +90,12 @@ const wordsToNumberRecurse =
         return wordsToNumberRecurse(words.slice(1), curNumber, [ ...numericPhrase, 'point'], consumed + 1, isNegative)
     }
 
-    const newPhrase = [...numericPhrase, word]
-    const newNumber = Number(wordsToNumbers(newPhrase.join(' ')))
-    if (!isNumber(newNumber) || newNumber < curNumber) {
+    const newNumericPhrase = [...numericPhrase, word]
+    const newNumber = Number(wordsToNumbers(newNumericPhrase.join(' ')))
+    if (!isNumber(newNumber) || !isFinite(newNumber) || newNumber < curNumber) {
         return createParsedNumber(curNumber, isNegative, consumed)
     }
-    return wordsToNumberRecurse(words.slice(1), newNumber, newPhrase, consumed + 1, isNegative)
+    return wordsToNumberRecurse(words.slice(1), newNumber, newNumericPhrase, consumed + 1, isNegative)
 }
 
 export const wordsToParsedNumber = (words: string[]) => wordsToNumberRecurse(words)
