@@ -80,6 +80,16 @@ export function createClarificationResponse(possibleCmds: RunnableCmd<ParamMap>[
     return createMultichoiceResponse(possibleCmds)
 }
 
+export function createRepeatCmd(outputMessage: string): Cmd<NoParams> {
+    return createCmd([
+            Require(Any(['repeat', 'what'])),
+        ], 
+        () => ({ outputMessage }), 
+        undefined, 
+        createCmdMatchSettings(true),
+    )
+}
+
 /* export const createCmdListReadCmd = (cmds: Cmd<ParamMap>[]): Cmd<ParamMap> =>
     createCmd([
             Require(Any(['list commands', 'list command', 'read command', 'read commands'])),

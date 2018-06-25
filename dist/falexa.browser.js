@@ -432,6 +432,12 @@ function createClarificationResponse(possibleCmds) {
     return createMultichoiceResponse(possibleCmds);
 }
 exports.createClarificationResponse = createClarificationResponse;
+function createRepeatCmd(outputMessage) {
+    return _1.createCmd([
+        syntax_1.Require(syntax_1.Any(['repeat', 'what'])),
+    ], () => ({ outputMessage }), undefined, _1.createCmdMatchSettings(true));
+}
+exports.createRepeatCmd = createRepeatCmd;
 
 },{".":10,"./syntax":17,"lodash":89,"util":94}],12:[function(require,module,exports){
 "use strict";
@@ -618,17 +624,29 @@ const interpretPrioritizedCmds = (priorityCmds, cmds, txt) => {
     }
     return exactPrioritizedResults;
 };
+const getOutputMessage = (interpretation) => {
+    if (interpretation === undefined) {
+        return '';
+    }
+    return interpretation.outputMessage === undefined ? '' : interpretation.outputMessage;
+};
+const createDefaultPrioritizedCmds = (lastInterpretation) => {
+    return [
+        interactSkills_1.createRepeatCmd(getOutputMessage(lastInterpretation)),
+    ];
+};
 const _newInterpretter = (cmds, prioritizedCmds = [], interpretation) => ({
     getOutputMessage() {
-        if (interpretation === undefined) {
-            return '';
-        }
-        return interpretation.outputMessage === undefined ? '' : interpretation.outputMessage;
+        return getOutputMessage(interpretation);
     },
     getContextualCmds() { return [...prioritizedCmds]; },
     interpret(txt) {
         const nextInterpretation = interpretPrioritizedCmds(prioritizedCmds, cmds, txt);
-        return _newInterpretter(cmds, nextInterpretation.contextualCmds === undefined ? [] : nextInterpretation.contextualCmds, nextInterpretation);
+        const nextContextualCmds = [
+            ...(nextInterpretation.contextualCmds === undefined ? [] : nextInterpretation.contextualCmds),
+            ...createDefaultPrioritizedCmds(nextInterpretation),
+        ];
+        return _newInterpretter(cmds, nextContextualCmds, nextInterpretation);
     },
 });
 exports.newInterpretter = (cmds) => _newInterpretter(cmds);

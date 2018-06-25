@@ -7,8 +7,8 @@ import { assertEqualCmd } from '../../../../src/test/phonetic/cmdUtil';
 
 describe('input format', () => {
     const strAssertCmd = assertEqualCmd([
-        Require(Any(['assert'])), 
-        Var('strVal1', Sentence())], 
+        Require(Any(['assert'])),
+        Var('strVal1', Sentence())],
         { strVal1: 'the man went to the store' })
     const interpretter = newInterpretter([strAssertCmd])
 
@@ -22,8 +22,8 @@ describe('input format', () => {
 
 describe('fuzzy interpretation', () => {
     const strAssertCmd = assertEqualCmd([
-        Require(Any(['for'])), 
-        Var('strVal1', Sentence())], 
+        Require(Any(['for'])),
+        Var('strVal1', Sentence())],
         { strVal1: 'hello world' })
     const interpretter = newInterpretter([strAssertCmd])
 
@@ -37,15 +37,15 @@ describe('fuzzy interpretation', () => {
 
 describe('strictness of interpretation', () => {
     const strAssertCmd = createCmd([
-        Require(Any(['assert'])), 
+        Require(Any(['assert'])),
         Var('strVal1', Sentence()),
-    ], () => ({outputMessage: 'ran'}))
+    ], () => ({ outputMessage: 'ran' }))
     const interpretter = newInterpretter([strAssertCmd])
 
     it('should not match if order does not match', () => {
         const interpretation = interpretter.interpret('walk then assert hello world')
         // Should get asked to confirm running since match wasn't exact
-        expect(interpretation.getContextualCmds().length).toEqual(2)
+        expect(interpretation.getContextualCmds().length).toBeGreaterThan(1)
 
         const confirmedRun = interpretation.interpret('yes')
         expect(confirmedRun.getOutputMessage()).toEqual('ran')
@@ -53,10 +53,24 @@ describe('strictness of interpretation', () => {
     it('should run after confirmation when it sounds similar', () => {
         const interpretation = interpretter.interpret('alert hello world')
         // Should get asked to confirm running since match wasn't exact
-        expect(interpretation.getContextualCmds().length).toEqual(2)
+        expect(interpretation.getContextualCmds().length).toBeGreaterThan(1)
 
         const confirmedRun = interpretation.interpret('yes')
         expect(confirmedRun.getOutputMessage()).toEqual('ran')
     })
+})
 
+describe('Built-in commands', () => {
+    const strAssertCmd = createCmd([
+        Require(Any(['assert'])),
+        Var('strVal1', Sentence()),
+    ], () => ({ outputMessage: 'ran' }))
+    const interpretter = newInterpretter([strAssertCmd])
+
+    it('repeats last spoken command', () => {
+        const interpretted = interpretter.interpret('assert ran')
+        const repeated = interpretted.interpret('repeat')
+
+        expect(repeated.getOutputMessage()).toEqual(interpretted.getOutputMessage())
+    })
 })

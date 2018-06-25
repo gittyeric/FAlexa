@@ -3,7 +3,7 @@ import { Cmd, CmdMatchSettings,
 import { RunnableCmd, DirectiveInterpretation, DirectiveInterpretations} from './moduleInterfaces';
 import { trimd } from './sort';
 import { filterFirstStopwords, txtToValidWords } from './text';
-import { createClarificationResponse, defaultCmdDescription } from './interactSkills';
+import { createClarificationResponse, defaultCmdDescription, createRepeatCmd } from './interactSkills';
 import { cloneDeep } from 'lodash';
 
 export type SyntaxInterpretation<P extends ParamMap> = DirectiveInterpretations<P>
@@ -287,25 +287,39 @@ export interface Interpretter {
     interpret(txt: string): Interpretter,
 }
 
+const getOutputMessage = (interpretation?: CmdResponse): string => {
+    if (interpretation === undefined) {
+        return ''
+    }
+    return interpretation.outputMessage === undefined ? '' : interpretation.outputMessage
+}
+
+const createDefaultPrioritizedCmds = (lastInterpretation: CmdResponse): Cmd<ParamMap>[] => {
+    return [
+        createRepeatCmd(getOutputMessage(lastInterpretation)),
+    ]
+}
+
 const _newInterpretter = (
     cmds: Cmd<ParamMap>[], 
     prioritizedCmds: Cmd<ParamMap>[] = [], 
     interpretation?: CmdResponse): Interpretter => ({
 
         getOutputMessage(): string {
-            if (interpretation === undefined) {
-                return ''
-            }
-            return interpretation.outputMessage === undefined ? '' : interpretation.outputMessage
+            return getOutputMessage(interpretation)
         },
 
         getContextualCmds(): Cmd<ParamMap>[] { return [...prioritizedCmds] },
 
         interpret(txt: string): Interpretter {
             const nextInterpretation = interpretPrioritizedCmds(prioritizedCmds, cmds, txt)
+            const nextContextualCmds = [
+                ...(nextInterpretation.contextualCmds === undefined ? [] : nextInterpretation.contextualCmds),
+                ...createDefaultPrioritizedCmds(nextInterpretation),
+            ]
             return _newInterpretter(
                 cmds,
-                nextInterpretation.contextualCmds === undefined ? [] : nextInterpretation.contextualCmds,
+                nextContextualCmds,
                 nextInterpretation,
             )
         },
