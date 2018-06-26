@@ -49,7 +49,7 @@ export const createSubtractCmd = (): Cmd<CalcParams> =>
             Var('arg2', Numeric()),
         ], ({arg1, arg2}: CalcParams) => ({
             outputMessage: `${arg1 - arg2}`,
-        }), () => 'multiply', createCmdMatchSettings(false, true),
+        }), () => 'subtract', createCmdMatchSettings(false, true),
     )
 
 export const createCalculatorCmds = (): Cmd<CalcParams>[] => [

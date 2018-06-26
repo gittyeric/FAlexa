@@ -37,6 +37,10 @@ export const matchWordsToPhrase = (words: string[], phrase: string): string[] =>
 export const txtToValidWords = (txt: string) => {
     return txt
         .toLowerCase()
+        .replace(/\+/g, ' plus ')
+        .replace(/\-/g, ' minus ')
+        .replace(/\&/g, ' and ')
+        .replace(/\@/g, ' at ')
         .replace(/[^a-z0-9\. ]/g, ' ')
         .split(' ')
         .map((word: string) => word.trim())

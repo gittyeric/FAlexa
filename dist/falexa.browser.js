@@ -169,7 +169,7 @@ exports.createSubtractCmd = () => __1.createCmd([
     syntax_1.Var('arg2', syntax_1.Numeric()),
 ], ({ arg1, arg2 }) => ({
     outputMessage: `${arg1 - arg2}`,
-}), () => 'multiply', __1.createCmdMatchSettings(false, true));
+}), () => 'subtract', __1.createCmdMatchSettings(false, true));
 exports.createCalculatorCmds = () => [
     exports.createAddCmd(),
     exports.createSubtractCmd(),
@@ -1096,6 +1096,10 @@ exports.matchWordsToPhrase = (words, phrase) => {
 exports.txtToValidWords = (txt) => {
     return txt
         .toLowerCase()
+        .replace(/\+/g, ' plus ')
+        .replace(/\-/g, ' minus ')
+        .replace(/\&/g, ' and ')
+        .replace(/\@/g, ' at ')
         .replace(/[^a-z0-9\. ]/g, ' ')
         .split(' ')
         .map((word) => word.trim())
