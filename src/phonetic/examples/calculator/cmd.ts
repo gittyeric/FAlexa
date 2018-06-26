@@ -8,8 +8,6 @@ export interface CalcParams extends ParamMap {
     arg2: number,
 }
 
-// --------------------- Note Commands ------------------------------------
-
 export const createAddCmd = (): Cmd<CalcParams> => 
     createCmd([
             Require(Any(['add'])),
