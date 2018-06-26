@@ -2,6 +2,7 @@ import * as speech from './io/speech';
 import * as recognition from './io/recognition';
 import * as notes from './phonetic/examples/note/cmd';
 import * as timers from './phonetic/examples/timer/cmd';
+import * as calculator from './phonetic/examples/calculator/cmd';
 
 export const Speech = speech
 export const Recognition = recognition
@@ -13,4 +14,5 @@ export * from './phonetic'
 export const Examples = {
     Timers: timers,
     Notes: notes,
+    Calculator: calculator,
 }

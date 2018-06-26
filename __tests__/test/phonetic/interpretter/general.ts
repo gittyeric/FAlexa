@@ -60,6 +60,34 @@ describe('strictness of interpretation', () => {
     })
 })
 
+describe('Match Tie breaking', () => {
+    const shortCmd = createCmd([
+            Require(Any(['first'])),
+            Var('v', Sentence()),
+        ], 
+        () => undefined,
+        () => 'short',
+    )
+    const longCmd = createCmd([
+            Require(Any(['first'])),
+            Require(Any(['second'])),
+            Var('v', Sentence()),
+        ], 
+        () => undefined,
+        () => 'long',
+    )
+    const interpretter = newInterpretter([shortCmd, longCmd])
+
+    it('Orders penalty ties by descending directive count', () => {
+        const interpretted = interpretter.interpret('first second')
+        const shortIndex = interpretted.getOutputMessage().indexOf('short')
+        const longIndex = interpretted.getOutputMessage().indexOf('long')
+
+        expect(longIndex).toBeGreaterThan(-1)
+        expect(longIndex).toBeLessThan(shortIndex)
+    })
+})
+
 describe('Built-in commands', () => {
     const strAssertCmd = createCmd([
         Require(Any(['assert'])),

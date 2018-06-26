@@ -201,19 +201,48 @@ function cmdInterpretationToRunParams<P extends ParamMap>(interpretation: Direct
     return interpretation[interpretation.length - 1].runParams
 }
 
+const sortByDirectiveCount = (curInterpretations: CmdInterpretations): CmdInterpretations =>
+    curInterpretations.sort( (interp1: CmdInterpretation<ParamMap>, interpr2: CmdInterpretation<ParamMap>) => 
+        interp1.cmd.syntax.length > interpr2.cmd.syntax.length ? -1 : 1 )
+
+function sortTiedCmds(interpretations: CmdInterpretations): CmdInterpretations {
+    const sorted: CmdInterpretations = []
+    let curPenalty = -1
+    let curInterpretations: CmdInterpretations = []
+    for (let i = 0; i < interpretations.length; i++) {
+        const interpretation = interpretations[i]
+        if (interpretation.minPenalty !== curPenalty) {
+            curPenalty = interpretation.minPenalty
+            sortByDirectiveCount(curInterpretations)
+            sorted.push(...curInterpretations)
+            curInterpretations = []
+        }
+        curInterpretations.push(interpretation)
+    }
+
+    if (curInterpretations.length > 0) {
+        sortByDirectiveCount(curInterpretations)
+        sorted.push(...curInterpretations)
+    }
+
+    return sorted
+}
+
 function topCmdInterpretationsToRunnables(interpretations: CmdInterpretations): RunnableCmd<ParamMap>[] {
+    const sortedInterpretations = sortTiedCmds(interpretations)
+
     // If only 1 cmd type to run, pick between the top maxResults
-    if (interpretations.length === 1) {
+    if (sortedInterpretations.length === 1) {
         // Return remaining interpretations
-        return interpretations[0].topInterpretations.slice(0, interpretations[0].cmd.matchSettings.maxFuzzyCmds)
+        return sortedInterpretations[0].topInterpretations.slice(0, sortedInterpretations[0].cmd.matchSettings.maxFuzzyCmds)
             .map((syntaxInterpretation: SyntaxInterpretation<ParamMap>) => ({
-                cmd: interpretations[0].cmd,
+                cmd: sortedInterpretations[0].cmd,
                 runParams: cmdInterpretationToRunParams(syntaxInterpretation),
             }))
     }
 
     // If multiple cmd types match, pick between the best of the top 2 cmd matches
-    return interpretations.slice(0, 2).map((cmdInterpretation: CmdInterpretation<ParamMap>) => ({
+    return sortedInterpretations.slice(0, 2).map((cmdInterpretation: CmdInterpretation<ParamMap>) => ({
         cmd: cmdInterpretation.cmd,
         runParams: cmdInterpretationToRunParams(cmdInterpretation.topInterpretations[0]),
     }))
