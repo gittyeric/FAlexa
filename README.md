@@ -3,7 +3,7 @@
 Create your own verbal commands that map to custom Javascript functions! Inspired by Alexa Skills, FAlexa (pronounced F-Alexa) gives you a simple, order-based syntax to safely call your Javascript or Typescript functions by flexible verbal command.  You don't have to give up your voice to Amazon or Google to get the benefits of modern voice recognition, since modern browsers now have it built in!  Falexa should work just fine in Chrome and in Firefox with some tweaking.
 
 ## Demo
-Get a quick flavor of how FAlexa works by trying it out (here)[https://letsmakeit.com/diy-voice-assistant/] (Chrome only!)
+Get a quick flavor of how FAlexa works by trying it out [here](https://letsmakeit.com/diy-voice-assistant/) (Chrome only!)
 
 ## Quick Example Command: Define an in-browser verbal multiply command
 
@@ -42,7 +42,7 @@ multiplierBot.startListening();
 
 ## Frontend Installation
 
-Grab (dist/falexa.browser.min.js)[dist/falexa.browser.min.js] and add it to your HTML:
+Grab [dist/falexa.browser.min.js](dist/falexa.browser.min.js) and add it to your HTML:
 
 <script src="path/to/falexa.browser.min.js"></script>
 
@@ -137,4 +137,4 @@ And(filters: Filter[])
 
 #### Custom Filters
 
-Creating your own filter is pretty easy, check out how it's done in (syntax.ts)[src/phonetic/syntax.ts]!
+Creating your own filter is pretty easy, check out how it's done in ["syntax.ts"](src/phonetic/syntax.ts)!
