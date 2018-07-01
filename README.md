@@ -7,7 +7,7 @@ Get a quick flavor of how FAlexa works by trying it out [here](https://letsmakei
 
 ## Quick Example Command: Define an in-browser verbal multiply command
 
-"""
+```
 
 // 'Import' Falexa functions we'll be using
 
@@ -44,7 +44,7 @@ var multiplierBot = falexa( [multiplyCmd] );
 // In some mouse or keyboard event handler, start falexa and the microphone!
 
 multiplierBot.startListening();
-"""
+```
 
 ## Frontend Installation
 
@@ -59,17 +59,17 @@ This adds "Falexa" to Javascript globally; now you can run the example above!
 Make sure you have Git and Node.js version 8 (or above?) installed with npm as well, and Chrome browser for testing.
 Run the following command line:
 
-"""
+```
 git clone https://github.com/gittyeric/FAlexa.git
 npm install
 npm run build
-"""
+```
 
 If you'd like to contribute, commit your work on a new branch and run the following:
 
-"""
+```
 npm run deploy-dry
-"""
+```
 
 If all tests pass, send a Pull Request in GitHub!
 
@@ -101,56 +101,65 @@ Filters are a chain of 1 or more functions that take all possible interpretation
 
 Match a phrase of specific word length
 
-Phrase(wordCount, filter = passThruFilter)
+*Phrase*(wordCount, filter = passThruFilter)
+
 
 Match next 1 word from remaining words
 
-Word(filter = passThruFilter)
+*Word*(filter = passThruFilter)
+
 
 Match a phrase by stopword. The match will exclude the stopword by default.
 
-StopPhrase(stopwords, includeStopword = false, filter = passThruFilter)
+*StopPhrase*(stopwords, includeStopword = false, filter = passThruFilter)
+
 
 Match all remaining words to the end of input, should only be used for last directive
 
-Sentence(filter: Filter = passThruFilter)
+*Sentence*(filter: Filter = passThruFilter)
+
 
 #### String & Numeric filters
 
 Match any phrases or words and pass them along
 
-Any(whitelist: string[], filter: Filter = passThruFilter)
+*Any*(whitelist: string[], filter: Filter = passThruFilter)
+
 
 Same as Any but dynamically generate the whitelist
 
-GetAny(whitelistGenerator: () => string[], filter: Filter = passThruFilter)
+*GetAny*(whitelistGenerator: () => string[], filter: Filter = passThruFilter)
+
 
 Only match phrases or words that are NOT in the blacklist. All blacklist entries must have the same word count!
 For multi-word length lists, use multiple Nones.
 
-None(blacklist: string[], filter: Filter = passThruFilter)
+*None*(blacklist: string[], filter: Filter = passThruFilter)
+
 
 Same as None but dynamically generate the blacklist
 
-GetNone(blacklistGenerator: () => string[], filter: Filter = passThruFilter)
+*GetNone*(blacklistGenerator: () => string[], filter: Filter = passThruFilter)
+
 
 Match any number including decimals like 3.14
 Also match a spoken numeric phrase, like "one thousand and fourty two point five"
 It will appear as a Number type in your command's runFunc
 
-Numeric(min: number = Number.MIN_VALUE, max: number = Number.MAX_VALUE, filter: Filter = passThruFilter)
+*Numeric*(min: number = Number.MIN_VALUE, max: number = Number.MAX_VALUE, filter: Filter = passThruFilter)
 
 #### Boolean Filters
 
 Give back interpretations that match any of the filters.
 Assume the minimum penalty across each words / VarType duplicate interpretation
 
-Or(filters: Filter[])
+*Or*(filters: Filter[])
+
 
 Give back only the interpretations that match words across all filters, and assume the worst penalty
 over all the filtered outputs across each interpretation
 
-And(filters: Filter[])
+*And*(filters: Filter[])
 
 #### Custom Filters
 
