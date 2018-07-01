@@ -5,7 +5,7 @@ Create your own verbal commands that map to custom Javascript functions! Inspire
 ## Demo
 Get a quick flavor of how FAlexa works by trying it out [here](https://letsmakeit.com/diy-voice-assistant/) (Chrome only!)
 
-## Quick Example Command: Define an in-browser verbal multiply command
+## Quick Example: Define a spoken multiply command
 
 ```
 
@@ -89,9 +89,9 @@ Your command's syntax is order-based and composed of "Directives", which typical
 
 ### Filters
 
-Filters are a chain of 1 or more functions that take all possible interpretations from the function before it, and filter them by some criteria.  Most functions reduce the number of matched, filtered words that will be used as the value for the chain's parent directive.  Some functions like Exact however, simply filter out fuzzy interpretations from previously run filters up the chain.  Filters are run like functions, from inner-most to outer-most, so that Any will run first and give it's results to Exact in the example: Exact(Any('save', 'safe'))
+Filters are a chain of 1 or more functions that take all possible interpretations from the function before it, and filter them by some criteria.  Most functions reduce the number of matched, filtered words that will be used as the value for the chain's parent directive.  Some functions like Exact however, simply filter out fuzzy interpretations from previously run filters up the chain.  Filters are run like functions, from inner-most to outer-most, so that Any will run first and give it's results to Exact in the example: Exact(Any(['save', 'safe']))
 
-#### Phrase or Word Filters
+### Phrase or Word Filters
 
 <b>Phrase</b>(wordCount, filter = passThruFilter): Match a phrase of specific word length
 
@@ -105,7 +105,7 @@ Filters are a chain of 1 or more functions that take all possible interpretation
 <b>Sentence</b>(filter: Filter = passThruFilter): Match all remaining words to the end of input, should only be used for last directive
 
 
-#### String & Numeric filters
+### String & Numeric filters
 
 
 <b>Any</b>(whitelist: string[], filter: Filter = passThruFilter): Match any phrases or words and pass them along
@@ -125,7 +125,7 @@ For multi-word length lists, use multiple Nones.
 Also match a spoken numeric phrase, like "one thousand and fourty two point five"
 It will appear as a Number type in your command's runFunc
 
-#### Boolean Filters
+### Boolean Filters
 
 <b>Or</b>(filters: Filter[]): Give back interpretations that match any of the filters.
 Assume the minimum penalty across each words / VarType duplicate interpretation
@@ -133,6 +133,6 @@ Assume the minimum penalty across each words / VarType duplicate interpretation
 
 <b>And</b>(filters: Filter[]): Give back only the interpretations that match words across all filters, and assume the worst penalty over all the filtered outputs across each interpretation
 
-#### Custom Filters
+### Custom Filters
 
 Creating your own filter is pretty easy, check out how it's done in [syntax.ts](src/phonetic/syntax.ts)!
