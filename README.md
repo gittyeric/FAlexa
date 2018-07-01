@@ -10,6 +10,7 @@ Get a quick flavor of how FAlexa works by trying it out [here](https://letsmakei
 """
 
 // 'Import' Falexa functions we'll be using
+
 var {
     falexa, 
     createCmd,
@@ -18,11 +19,13 @@ var {
 } = Falexa;
 
 // Make the command's run function speak aloud the product of 2 numbers
+
 var runFunc = (paramMap) => ({
     outputMessage: `${paramMap.arg1 * paramMap.arg2}`,
 });
 
 // Create the syntax that the sentence must match to, an array of directives with filters
+
 var matchSyntax = [
     Require(Any(['multiply'])), // First word must be 'multiply'
     Var('arg1', Numeric()),     // Next phrase must be numeric like 'twenty one'
@@ -31,12 +34,15 @@ var matchSyntax = [
 ];
 
 // Create the actual command
+
 var multiplyCmd = createCmd(matchSyntax, runFunc);
 
 // Create browser Falexa instance with default mic & voice
+
 var multiplierBot = falexa( [multiplyCmd] );
 
 // In some mouse or keyboard event handler, start falexa and the microphone!
+
 multiplierBot.startListening();
 """
 
@@ -93,48 +99,59 @@ Filters are a chain of 1 or more functions that take all possible interpretation
 
 #### Phrase or Word Filters
 
-// Match a phrase of specific word length
+Match a phrase of specific word length
+
 Phrase(wordCount, filter = passThruFilter)
 
-// Match next 1 word from remaining words
+Match next 1 word from remaining words
+
 Word(filter = passThruFilter)
 
-// Match a phrase by stopword. The match will exclude the stopword by default.
+Match a phrase by stopword. The match will exclude the stopword by default.
+
 StopPhrase(stopwords, includeStopword = false, filter = passThruFilter)
 
-// Match all remaining words to the end of input, should only be used for last directive
+Match all remaining words to the end of input, should only be used for last directive
+
 Sentence(filter: Filter = passThruFilter)
 
 #### String & Numeric filters
 
-// Match any phrases or words and pass them along
+Match any phrases or words and pass them along
+
 Any(whitelist: string[], filter: Filter = passThruFilter)
 
-// Same as Any but dynamically generate the whitelist
+Same as Any but dynamically generate the whitelist
+
 GetAny(whitelistGenerator: () => string[], filter: Filter = passThruFilter)
 
-// Only match phrases or words that are NOT in the blacklist. All blacklist entries must have the same word count!
-// For multi-word length lists, use multiple Nones.
+Only match phrases or words that are NOT in the blacklist. All blacklist entries must have the same word count!
+For multi-word length lists, use multiple Nones.
+
 None(blacklist: string[], filter: Filter = passThruFilter)
 
-// Same as None but dynamically generate the blacklist
+Same as None but dynamically generate the blacklist
+
 GetNone(blacklistGenerator: () => string[], filter: Filter = passThruFilter)
 
-// Match any number including decimals like 3.14
-// Also match a spoken numeric phrase, like "one thousand and fourty two point five"
-// It will appear as a Number type in your command's runFunc
+Match any number including decimals like 3.14
+Also match a spoken numeric phrase, like "one thousand and fourty two point five"
+It will appear as a Number type in your command's runFunc
+
 Numeric(min: number = Number.MIN_VALUE, max: number = Number.MAX_VALUE, filter: Filter = passThruFilter)
 
 #### Boolean Filters
 
-// Give back interpretations that match any of the filters.
-// Assume the minimum penalty across each words / VarType duplicate interpretation
+Give back interpretations that match any of the filters.
+Assume the minimum penalty across each words / VarType duplicate interpretation
+
 Or(filters: Filter[])
 
-// Give back only the interpretations that match words across all filters, and assume the worst penalty
-// over all the filtered outputs across each interpretation
+Give back only the interpretations that match words across all filters, and assume the worst penalty
+over all the filtered outputs across each interpretation
+
 And(filters: Filter[])
 
 #### Custom Filters
 
-Creating your own filter is pretty easy, check out how it's done in ["syntax.ts"](src/phonetic/syntax.ts)!
+Creating your own filter is pretty easy, check out how it's done in [syntax.ts](src/phonetic/syntax.ts)!
