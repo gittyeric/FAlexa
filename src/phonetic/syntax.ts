@@ -232,7 +232,7 @@ const lazyNoneFilter = (phraseBlacklistGenerator: () => string[], preFilter: Fil
         return noneFilter(phraseBlacklistGenerator(), preFilter)(filteredInput)
     }
 
-const numericFilter = (minNumber: number = 0, maxNumber: number = Infinity, preFilter: Filter): Filter =>
+const numericFilter = (minNumber: number, maxNumber: number, preFilter: Filter): Filter =>
     (filteredInput: FilterInterpretations): FilterInterpretations => {
         return preFilter(filteredInput).map((interpretation: FilterInterpretation) => {
             const parsedNumber = wordsToParsedNumber(interpretation.words)
@@ -325,10 +325,12 @@ function optionDirective<P extends ParamMap>
 
 // ------------------------ Directives ---------------------------------------------
 
-// Require a phrase to come through the filter and store the value as 'name'
+// Require a filtered subset of the input sentence and store it as 'name'
+// in the named parameter list that'll be used to invoke the command's run function
 export const Var = (name: string, filter: Filter) => varDirective(name, filter)
 
 // Same as Var, but a match is not required for the command to run
+// If the filter returns no match, don't consume any input words and move on
 export const Option = (name: string, defaultVal: string | number | undefined, filter: Filter) => 
     optionDirective(name, defaultVal, filter)
 
@@ -343,14 +345,14 @@ export const Ignore = (filter: Filter) => optionDirective(undefined, undefined, 
 // Match a phrase of specific word length
 export const Phrase = (wordCount: number, filter: Filter = passThruFilter) => phraseFilter(wordCount, filter)
 
-// Match 1 word
+// Match next 1 word from remaining words
 export const Word = (filter: Filter = passThruFilter) => Phrase(1, filter)
 
 // Match a phrase by stopword. The match will exclude the stopword by default.
 export const StopPhrase = (stopwords: string[], includeStopword: boolean = false, filter: Filter = passThruFilter) =>
     stopPhraseFilter(stopwords, includeStopword, filter)
 
-// Match all remaining words to the end of input
+// Match all remaining words to the end of input, should only be used for last directive
 export const Sentence = (filter: Filter = passThruFilter) => remainingPhraseFilter(filter)
 
 // ---------------------------- Boolean Filters -----------------------------------------
@@ -372,7 +374,8 @@ export const Any = (whitelist: string[], filter: Filter = passThruFilter) => any
 export const GetAny = (whitelistGenerator: () => string[], filter: Filter = passThruFilter) => lazyAnyFilter(whitelistGenerator, filter)
 
 // Only match phrases or words that are NOT in the blacklist. All blacklist entries must have the same word count!
-// For multi-word length lists, use multiple Nones.
+// For multi-length word lists, use multiple Nones.
+// The blacklist[0]'s word length will be consumed from the input senetence if filter matches
 export const None = (blacklist: string[], filter: Filter = passThruFilter) => noneFilter(blacklist, filter)
 
 // Same as None but dynamically generate the blacklist
@@ -380,7 +383,7 @@ export const GetNone = (blacklistGenerator: () => string[], filter: Filter = pas
 
 // Match any number including decimals like 3.14
 // It will appear as a Number type in your command's runFunc
-export const Numeric = (min: number = 0, max: number = Number.MAX_VALUE, filter: Filter = passThruFilter) => 
+export const Numeric = (min: number = Number.MIN_VALUE, max: number = Number.MAX_VALUE, filter: Filter = passThruFilter) => 
     numericFilter(min, max, filter)
 
 // --- TO DO: Transformers, handle in your runFunc manually for now!

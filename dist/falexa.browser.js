@@ -149,7 +149,7 @@ exports.createAddCmd = () => __1.createCmd([
 exports.createMultiplyCmd = () => __1.createCmd([
     syntax_1.Require(syntax_1.Any(['multiply'])),
     syntax_1.Var('arg1', syntax_1.Numeric()),
-    syntax_1.Require(syntax_1.Any(['and', 'to', 'with', 'times'])),
+    syntax_1.Require(syntax_1.Any(['and', 'with', 'times'])),
     syntax_1.Var('arg2', syntax_1.Numeric()),
 ], ({ arg1, arg2 }) => ({
     outputMessage: `${arg1 * arg2}`,
@@ -987,7 +987,7 @@ const noneFilter = (phraseBlacklist, preFilter) => {
 const lazyNoneFilter = (phraseBlacklistGenerator, preFilter) => (filteredInput) => {
     return noneFilter(phraseBlacklistGenerator(), preFilter)(filteredInput);
 };
-const numericFilter = (minNumber = 0, maxNumber = Infinity, preFilter) => (filteredInput) => {
+const numericFilter = (minNumber, maxNumber, preFilter) => (filteredInput) => {
     return preFilter(filteredInput).map((interpretation) => {
         const parsedNumber = numeric_1.wordsToParsedNumber(interpretation.words);
         if (isFinite(parsedNumber.value) &&
@@ -1061,7 +1061,7 @@ exports.Any = (whitelist, filter = passThruFilter) => anyFilter(whitelist, filte
 exports.GetAny = (whitelistGenerator, filter = passThruFilter) => lazyAnyFilter(whitelistGenerator, filter);
 exports.None = (blacklist, filter = passThruFilter) => noneFilter(blacklist, filter);
 exports.GetNone = (blacklistGenerator, filter = passThruFilter) => lazyNoneFilter(blacklistGenerator, filter);
-exports.Numeric = (min = 0, max = Number.MAX_VALUE, filter = passThruFilter) => numericFilter(min, max, filter);
+exports.Numeric = (min = Number.MIN_VALUE, max = Number.MAX_VALUE, filter = passThruFilter) => numericFilter(min, max, filter);
 
 },{"./numeric":14,"./publicInterfaces":15,"./sort":16,"./text":19,"lodash":90,"util":95}],19:[function(require,module,exports){
 "use strict";
@@ -1097,9 +1097,9 @@ exports.txtToValidWords = (txt) => {
     return txt
         .toLowerCase()
         .replace(/\+/g, ' plus ')
-        .replace(/\-/g, ' minus ')
-        .replace(/\&/g, ' and ')
-        .replace(/\@/g, ' at ')
+        .replace(/\-\s*([0-9]+)/g, ' negative $1')
+        .replace(/\s\&\s/g, ' and ')
+        .replace('=', ' equals ')
         .replace(/[^a-z0-9\. ]/g, ' ')
         .split(' ')
         .map((word) => word.trim())

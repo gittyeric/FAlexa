@@ -16,7 +16,7 @@ describe('input format', () => {
         interpretter.interpret('assert the\nman\twent to  the\t\tstore')
     })
     it('should irrelavent characters as whitespace', () => {
-        interpretter.interpret('assert the-man--went!@#$%^&*()to/the`store~-=_+?<>,[]\{}|')
+        interpretter.interpret('assert the-man--went!@#$%^&*()to/the`store~-_?<>,[]\{}|')
     })
 })
 

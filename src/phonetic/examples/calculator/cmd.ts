@@ -23,7 +23,7 @@ export const createMultiplyCmd = (): Cmd<CalcParams> =>
     createCmd([
             Require(Any(['multiply'])),
             Var('arg1', Numeric()),
-            Require(Any(['and', 'to', 'with', 'times'])),
+            Require(Any(['and', 'with', 'times'])),
             Var('arg2', Numeric()),
         ], ({arg1, arg2}: CalcParams) => ({
             outputMessage: `${arg1 * arg2}`,
