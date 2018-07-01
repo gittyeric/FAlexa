@@ -10,7 +10,6 @@ Get a quick flavor of how FAlexa works by trying it out [here](https://letsmakei
 ```
 
 // 'Import' Falexa functions we'll be using
-
 var {
     falexa, 
     createCmd,
@@ -19,13 +18,11 @@ var {
 } = Falexa;
 
 // Make the command's run function speak aloud the product of 2 numbers
-
 var runFunc = (paramMap) => ({
     outputMessage: `${paramMap.arg1 * paramMap.arg2}`,
 });
 
 // Create the syntax that the sentence must match to, an array of directives with filters
-
 var matchSyntax = [
     Require(Any(['multiply'])), // First word must be 'multiply'
     Var('arg1', Numeric()),     // Next phrase must be numeric like 'twenty one'
@@ -34,15 +31,12 @@ var matchSyntax = [
 ];
 
 // Create the actual command
-
 var multiplyCmd = createCmd(matchSyntax, runFunc);
 
 // Create browser Falexa instance with default mic & voice
-
 var multiplierBot = falexa( [multiplyCmd] );
 
 // In some mouse or keyboard event handler, start falexa and the microphone!
-
 multiplierBot.startListening();
 ```
 
@@ -85,13 +79,13 @@ Most filters do fuzzy matching, where phonetically similar words are considered 
 
 Your command's syntax is order-based and composed of "Directives", which typically map to a parameter in your Javascript function.  Each directive has one or more filters to refine matching.  There are 4 types:
 
-*Var(name, filter)*: The filter must match, and the filtered result will be saved with variable name "name" which will show up in your custom function parameter list.
+<b>Var(name, filter)</b>: The filter must match, and the filtered result will be saved with variable name "name" which will show up in your custom function parameter list.
 
-*Option(name, defaultValue, filter)*: Like a Var Directive, but can be skipped if the filter doesn't match to the remaining words, in which case defaultValue will be used instead without consuming input words.
+<b>Option(name, defaultValue, filter)</b>: Like a Var Directive, but can be skipped if the filter doesn't match to the remaining words, in which case defaultValue will be used instead without consuming input words.
 
-*Require(filter)*: Like a Var Directive, but ignore the filtered value after consuming one or more words.
+<b>Require(filter)</b>: Like a Var Directive, but ignore the filtered value after consuming one or more words.
 
-*Ignore(filter)*: Like Option, but ignore the filtered value.  Used to consume optional words that might exist, usually to keep them from showing up in the next directive.
+<b>Ignore(filter)</b>: Like Option, but ignore the filtered value.  Used to consume optional words that might exist, usually to keep them from showing up in the next directive.
 
 ### Filters
 
@@ -99,67 +93,45 @@ Filters are a chain of 1 or more functions that take all possible interpretation
 
 #### Phrase or Word Filters
 
-Match a phrase of specific word length
-
-*Phrase*(wordCount, filter = passThruFilter)
+<b>Phrase</b>(wordCount, filter = passThruFilter): Match a phrase of specific word length
 
 
-Match next 1 word from remaining words
-
-*Word*(filter = passThruFilter)
+<b>Word</b>(filter = passThruFilter): Match next 1 word from remaining words
 
 
-Match a phrase by stopword. The match will exclude the stopword by default.
-
-*StopPhrase*(stopwords, includeStopword = false, filter = passThruFilter)
+<b>StopPhrase</b>(stopwords, includeStopword = false, filter = passThruFilter): Match a phrase by stopword. The match will exclude the stopword by default.
 
 
-Match all remaining words to the end of input, should only be used for last directive
-
-*Sentence*(filter: Filter = passThruFilter)
+<b>Sentence</b>(filter: Filter = passThruFilter): Match all remaining words to the end of input, should only be used for last directive
 
 
 #### String & Numeric filters
 
-Match any phrases or words and pass them along
 
-*Any*(whitelist: string[], filter: Filter = passThruFilter)
-
-
-Same as Any but dynamically generate the whitelist
-
-*GetAny*(whitelistGenerator: () => string[], filter: Filter = passThruFilter)
+<b>Any</b>(whitelist: string[], filter: Filter = passThruFilter): Match any phrases or words and pass them along
 
 
-Only match phrases or words that are NOT in the blacklist. All blacklist entries must have the same word count!
+<b>GetAny</b>(whitelistGenerator: () => string[], filter: Filter = passThruFilter): Same as Any but dynamically generate the whitelist
+
+
+<b>None</b>(blacklist: string[], filter: Filter = passThruFilter): Only match phrases or words that are NOT in the blacklist. All blacklist entries must have the same word count!
 For multi-word length lists, use multiple Nones.
 
-*None*(blacklist: string[], filter: Filter = passThruFilter)
+
+<b>GetNone</b>(blacklistGenerator: () => string[], filter: Filter = passThruFilter): Same as None but dynamically generate the blacklist
 
 
-Same as None but dynamically generate the blacklist
-
-*GetNone*(blacklistGenerator: () => string[], filter: Filter = passThruFilter)
-
-
-Match any number including decimals like 3.14
+<b>Numeric</b>(min: number = Number.MIN_VALUE, max: number = Number.MAX_VALUE, filter: Filter = passThruFilter): Match any number including decimals like 3.14
 Also match a spoken numeric phrase, like "one thousand and fourty two point five"
 It will appear as a Number type in your command's runFunc
 
-*Numeric*(min: number = Number.MIN_VALUE, max: number = Number.MAX_VALUE, filter: Filter = passThruFilter)
-
 #### Boolean Filters
 
-Give back interpretations that match any of the filters.
+<b>Or</b>(filters: Filter[]): Give back interpretations that match any of the filters.
 Assume the minimum penalty across each words / VarType duplicate interpretation
 
-*Or*(filters: Filter[])
 
-
-Give back only the interpretations that match words across all filters, and assume the worst penalty
-over all the filtered outputs across each interpretation
-
-*And*(filters: Filter[])
+<b>And</b>(filters: Filter[]): Give back only the interpretations that match words across all filters, and assume the worst penalty over all the filtered outputs across each interpretation
 
 #### Custom Filters
 
