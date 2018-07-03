@@ -1,5 +1,7 @@
-import { Filter, Directive, 
-    ParamMap, VarType, ParamValue } from './publicInterfaces';
+import {
+    Filter, Directive,
+    ParamMap, VarType, ParamValue
+} from './publicInterfaces';
 import { FilterInterpretation, FilterInterpretations, DirectiveInterpretation, DirectiveInterpretations } from './moduleInterfaces';
 import { matchWordsToPhrase, phoneticPhraseDistance } from './text';
 import { wordsToParsedNumber } from './numeric';
@@ -119,7 +121,7 @@ const intersectInterpretationMaps = (map1: FilterInterpretationMap, map2: Filter
 }
 
 // merge all filters' results together and trim by penalty
-const orFilter = (filters: Filter[]): Filter => 
+const orFilter = (filters: Filter[]): Filter =>
     (filtered: FilterInterpretations): FilterInterpretations => {
         let mergeList: FilterInterpretationMap = {}
         const allResults = filters.map((filterI: Filter) => filterI(filtered))
@@ -131,7 +133,7 @@ const orFilter = (filters: Filter[]): Filter =>
 
 // merge together only the FilterInterpretations that are equal by matching
 // words and type, as well as number of input words consumed
-const andFilter = (filters: Filter[]): Filter => 
+const andFilter = (filters: Filter[]): Filter =>
     (filtered: FilterInterpretations): FilterInterpretations => {
         let candidateInterpretations = {}
         const allResults = filters.map((filterI: Filter) => filterI(filtered))
@@ -141,11 +143,11 @@ const andFilter = (filters: Filter[]): Filter =>
             }
             else {
                 candidateInterpretations = intersectInterpretationMaps(
-                    candidateInterpretations, 
+                    candidateInterpretations,
                     filterInterpretationsToMap(result))
             }
         })
-        
+
         return trimf(flatten(allResults))
     }
 
@@ -232,13 +234,21 @@ const lazyNoneFilter = (phraseBlacklistGenerator: () => string[], preFilter: Fil
         return noneFilter(phraseBlacklistGenerator(), preFilter)(filteredInput)
     }
 
+const precisionFilter = (maxAllowablePenalty: number, preFilter: Filter) => {
+    return (filteredInput: FilterInterpretations): FilterInterpretations => {
+        return trimf(preFilter(filteredInput).filter((interpretation: FilterInterpretation) =>
+            interpretation.penalty <= maxAllowablePenalty
+        ))
+    }
+}
+
 const numericFilter = (minNumber: number = 0, maxNumber: number = Infinity, preFilter: Filter): Filter =>
     (filteredInput: FilterInterpretations): FilterInterpretations => {
         return preFilter(filteredInput).map((interpretation: FilterInterpretation) => {
             const parsedNumber = wordsToParsedNumber(interpretation.words)
 
-            if (isFinite(parsedNumber.value) && 
-                parsedNumber.value >= minNumber && 
+            if (isFinite(parsedNumber.value) &&
+                parsedNumber.value >= minNumber &&
                 parsedNumber.value <= maxNumber) {
                 return {
                     ...interpretation,
@@ -300,27 +310,27 @@ function varDirective<P extends ParamMap>(name: string | undefined, filter: Filt
 // or match partially or not at all and consume nothing,
 // yeilding the defaultVal value for the 'name'ed parameter
 function optionDirective<P extends ParamMap>
-(name: string | undefined, defaultVal: ParamValue, filter: Filter): Directive<P> {
+    (name: string | undefined, defaultVal: ParamValue, filter: Filter): Directive<P> {
     const varType = !isNullOrUndefined(defaultVal) ?
         (isNumber(defaultVal) ? VarType.Numeric : VarType.Text) :
         VarType.Undefined
-    
+
     // Return all possible var match interpretations plus the default interpretation
     return (words: string[], runParams: P, maxFuzzyFilterResults: number): DirectiveInterpretations<P> => [
-            ...varDirective<P>(name, filter)(words, runParams, maxFuzzyFilterResults),
-            // Default interpretation
-            {
-                filterInterpretation: {
-                    maxResults: maxFuzzyFilterResults,
-                    penalty: 0,
-                    varType,
-                    words : [],
-                    consumed: 0,
-                },
-                runParams: updateParams(runParams, name, defaultVal),
-                remainingWords: words,
+        ...varDirective<P>(name, filter)(words, runParams, maxFuzzyFilterResults),
+        // Default interpretation
+        {
+            filterInterpretation: {
+                maxResults: maxFuzzyFilterResults,
+                penalty: 0,
+                varType,
+                words: [],
+                consumed: 0,
             },
-        ]
+            runParams: updateParams(runParams, name, defaultVal),
+            remainingWords: words,
+        },
+    ]
 }
 
 // ------------------------ Directives ---------------------------------------------
@@ -329,7 +339,7 @@ function optionDirective<P extends ParamMap>
 export const Var = (name: string, filter: Filter) => varDirective(name, filter)
 
 // Same as Var, but a match is not required for the command to run
-export const Option = (name: string, defaultVal: string | number | undefined, filter: Filter) => 
+export const Option = (name: string, defaultVal: string | number | undefined, filter: Filter) =>
     optionDirective(name, defaultVal, filter)
 
 // Similar to Var, but does not add the filtered value to the named parameter list
@@ -347,10 +357,13 @@ export const Phrase = (wordCount: number, filter: Filter = passThruFilter) => ph
 export const Word = (filter: Filter = passThruFilter) => Phrase(1, filter)
 
 // Match a phrase by stopword. The match will exclude the stopword by default.
+// Often good to use an Exact filter after this to avoid fuzzily overmatching
 export const StopPhrase = (stopwords: string[], includeStopword: boolean = false, filter: Filter = passThruFilter) =>
     stopPhraseFilter(stopwords, includeStopword, filter)
 
 // Match all remaining words to the end of input
+// You should REALLY consider NOT using this since it may overmatch,
+// Use only with ignoreFuzzy or using Exact filters before this filter
 export const Sentence = (filter: Filter = passThruFilter) => remainingPhraseFilter(filter)
 
 // ---------------------------- Boolean Filters -----------------------------------------
@@ -378,9 +391,16 @@ export const None = (blacklist: string[], filter: Filter = passThruFilter) => no
 // Same as None but dynamically generate the blacklist
 export const GetNone = (blacklistGenerator: () => string[], filter: Filter = passThruFilter) => lazyNoneFilter(blacklistGenerator, filter)
 
+// Exact results only
+export const Exact = (preFilter: Filter) => precisionFilter(0, preFilter)
+
+// Allow only results at or above a certain probability
+export const Threshold = (maxAllowablePenalty: number, preFilter: Filter) =>
+    precisionFilter(maxAllowablePenalty, preFilter)
+
 // Match any number including decimals like 3.14
 // It will appear as a Number type in your command's runFunc
-export const Numeric = (min: number = 0, max: number = Number.MAX_VALUE, filter: Filter = passThruFilter) => 
+export const Numeric = (min: number = 0, max: number = Number.MAX_VALUE, filter: Filter = passThruFilter) =>
     numericFilter(min, max, filter)
 
 // --- TO DO: Transformers, handle in your runFunc manually for now!

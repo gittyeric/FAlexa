@@ -3,7 +3,7 @@ import {
     stopTimer,
 } from './skills';
 
-import { Var, Require, Any, StopPhrase, Numeric } from '../../syntax';
+import { Var, Require, Any, StopPhrase, Numeric, Exact } from '../../syntax';
 import { Cmd, ParamMap } from '../../publicInterfaces';
 import { createCmd } from '../../';
 
@@ -30,12 +30,12 @@ interface TimerNameParam extends ParamMap {
     name: string,
 }
 
-const timerNames = ['timer', 'alarm', 'clock']
+const timerNames = ['time', 'timer', 'alarm', 'clock']
 
 const createStartTimerCmd = (alarm: (alertMsg: string) => void): Cmd<TimerStartParams> => {
     const syntax = [
         Require(Any(['start', 'set'])),
-        Var('name', StopPhrase(timerNames)),
+        Var('name', Exact(StopPhrase(timerNames))),
         Require(Any(['for'])),
         Var('duration', Numeric()),
         Var('timeUnit', Any(['second', 'seconds', 'minute', 'minutes', 'hour', 'hours', 'our', 'ours'])),
@@ -55,27 +55,24 @@ const createStartTimerCmd = (alarm: (alertMsg: string) => void): Cmd<TimerStartP
         return undefined
     }
 
-    const describe = ({ name, duration, timeUnit }: TimerStartParams) => {
-        return `${name} for ${duration} ${timeUnit}`
-    }
+    const describe = ({ name, duration, timeUnit }: TimerStartParams) => 
+        `${name} for ${duration} ${timeUnit}`
 
     return createCmd(syntax, runFunc, describe)
 }
 
-const createStopTimerCmd = (): Cmd<TimerNameParam> => {
-    const runFunc = ({ name }: TimerNameParam): undefined => {
-        stopTimer(name)
-        return undefined
-    }
-    const describe = ({ name }: TimerNameParam) => 
-        `${name} stopped`
-
-    return createCmd<TimerNameParam>([
+const createStopTimerCmd = (): Cmd<TimerNameParam> => 
+    createCmd<TimerNameParam>([
             Require(Any(['stop', 'end'])),
-            Var('name', StopPhrase(timerNames)),
-        ], runFunc, describe,
+            Var('name', Exact(StopPhrase(timerNames))),
+        ], 
+        ({ name }: TimerNameParam): undefined => {
+            stopTimer(name)
+            return undefined
+        },
+        ({ name }: TimerNameParam) => 
+            `${name} stopped`,
     )
-}
 
 export const createTimerCmds = (alarm: (alertMsg: string) => void): Cmd<ParamMap>[] => [
     createStartTimerCmd(alarm),

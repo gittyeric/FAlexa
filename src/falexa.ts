@@ -64,6 +64,8 @@ export const createFalexa = (cmds: Cmd<ParamMap>[],
     }
 }
 
-export const falexa = (cmds: Cmd<ParamMap>[]): FAlexa => {
-    return createFalexa(cmds, defaultSpeaker(), getDefaultRecognition(), console.log)
+export const falexa = (
+    cmds: Cmd<ParamMap>[], 
+    speaker: Speaker = defaultSpeaker()): FAlexa => {
+    return createFalexa(cmds, speaker, getDefaultRecognition(), console.log)
 }

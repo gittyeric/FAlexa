@@ -1,6 +1,6 @@
 import { ParamMap, Cmd } from '../../publicInterfaces';
 import { createCmd, createCmdMatchSettings } from '../..';
-import { Numeric, Var, Require, Any } from '../../syntax';
+import { Numeric, Var, Require, Any, Exact } from '../../syntax';
 
 // Cmd run parameter types
 export interface CalcParams extends ParamMap { 
@@ -10,7 +10,7 @@ export interface CalcParams extends ParamMap {
 
 export const createAddCmd = (): Cmd<CalcParams> => 
     createCmd([
-            Require(Any(['add'])),
+            Require(Exact(Any(['add', 'ad']))),
             Var('arg1', Numeric()),
             Require(Any(['and', 'to', 'with', 'plus'])),
             Var('arg2', Numeric()),
@@ -21,7 +21,7 @@ export const createAddCmd = (): Cmd<CalcParams> =>
 
 export const createMultiplyCmd = (): Cmd<CalcParams> => 
     createCmd([
-            Require(Any(['multiply'])),
+            Require(Exact(Any(['multiply']))),
             Var('arg1', Numeric()),
             Require(Any(['and', 'to', 'with', 'times'])),
             Var('arg2', Numeric()),
@@ -32,7 +32,7 @@ export const createMultiplyCmd = (): Cmd<CalcParams> =>
 
 export const createDivideCmd = (): Cmd<CalcParams> => 
     createCmd([
-            Require(Any(['divide'])),
+            Require(Exact(Any(['divide']))),
             Var('arg1', Numeric()),
             Require(Any(['and', 'to', 'with', 'by'])),
             Var('arg2', Numeric()),
@@ -43,7 +43,7 @@ export const createDivideCmd = (): Cmd<CalcParams> =>
 
 export const createSubtractCmd = (): Cmd<CalcParams> => 
     createCmd([
-            Require(Any(['subtract'])),
+            Require(Exact(Any(['subtract', 'sub track']))),
             Var('arg1', Numeric()),
             Require(Any(['and', 'to', 'with', 'by', 'minus'])),
             Var('arg2', Numeric()),

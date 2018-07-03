@@ -37,8 +37,8 @@ exports.createFalexa = (cmds, speaker, sentenceSource, debugLogger) => {
         },
     };
 };
-exports.falexa = (cmds) => {
-    return exports.createFalexa(cmds, defaultSpeaker(), getDefaultRecognition(), console.log);
+exports.falexa = (cmds, speaker = defaultSpeaker()) => {
+    return exports.createFalexa(cmds, speaker, getDefaultRecognition(), console.log);
 };
 
 },{"./io/recognition":4,"./io/speech":5,"./phonetic/interpretter":13}],3:[function(require,module,exports){
@@ -139,7 +139,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const __1 = require("../..");
 const syntax_1 = require("../../syntax");
 exports.createAddCmd = () => __1.createCmd([
-    syntax_1.Require(syntax_1.Any(['add'])),
+    syntax_1.Require(syntax_1.Exact(syntax_1.Any(['add', 'ad']))),
     syntax_1.Var('arg1', syntax_1.Numeric()),
     syntax_1.Require(syntax_1.Any(['and', 'to', 'with', 'plus'])),
     syntax_1.Var('arg2', syntax_1.Numeric()),
@@ -147,7 +147,7 @@ exports.createAddCmd = () => __1.createCmd([
     outputMessage: `${arg1 + arg2}`,
 }), () => 'add', __1.createCmdMatchSettings(false, true));
 exports.createMultiplyCmd = () => __1.createCmd([
-    syntax_1.Require(syntax_1.Any(['multiply'])),
+    syntax_1.Require(syntax_1.Exact(syntax_1.Any(['multiply']))),
     syntax_1.Var('arg1', syntax_1.Numeric()),
     syntax_1.Require(syntax_1.Any(['and', 'to', 'with', 'times'])),
     syntax_1.Var('arg2', syntax_1.Numeric()),
@@ -155,7 +155,7 @@ exports.createMultiplyCmd = () => __1.createCmd([
     outputMessage: `${arg1 * arg2}`,
 }), () => 'multiply', __1.createCmdMatchSettings(false, true));
 exports.createDivideCmd = () => __1.createCmd([
-    syntax_1.Require(syntax_1.Any(['divide'])),
+    syntax_1.Require(syntax_1.Exact(syntax_1.Any(['divide']))),
     syntax_1.Var('arg1', syntax_1.Numeric()),
     syntax_1.Require(syntax_1.Any(['and', 'to', 'with', 'by'])),
     syntax_1.Var('arg2', syntax_1.Numeric()),
@@ -163,7 +163,7 @@ exports.createDivideCmd = () => __1.createCmd([
     outputMessage: `${arg1 * arg2}`,
 }), () => 'divide', __1.createCmdMatchSettings(false, true));
 exports.createSubtractCmd = () => __1.createCmd([
-    syntax_1.Require(syntax_1.Any(['subtract'])),
+    syntax_1.Require(syntax_1.Exact(syntax_1.Any(['subtract', 'sub track']))),
     syntax_1.Var('arg1', syntax_1.Numeric()),
     syntax_1.Require(syntax_1.Any(['and', 'to', 'with', 'by', 'minus'])),
     syntax_1.Var('arg2', syntax_1.Numeric()),
@@ -182,10 +182,11 @@ exports.createCalculatorCmds = () => [
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const __1 = require("../..");
+const syntax_1 = require("../../syntax");
 tslib_1.__exportStar(require("./skills"), exports);
 exports.createSaveNoteCmd = (notes) => __1.createCmd([
     __1.Require(__1.Any(['save', 'take'])),
-    __1.Require(__1.Any(['note', 'message'])),
+    __1.Require(syntax_1.Exact(__1.Any(['note', 'message']))),
     __1.Var('name', __1.StopPhrase(['with'])),
     __1.Var('note', __1.Sentence()),
 ], ({ name, note }) => {
@@ -194,7 +195,7 @@ exports.createSaveNoteCmd = (notes) => __1.createCmd([
 }, ({ name }) => `save note ${name}`);
 exports.createReadNoteCmd = (notes) => __1.createCmd([
     __1.Require(__1.Any(['get', 'read', 'play'])),
-    __1.Require(__1.Any(['note', 'message'])),
+    __1.Require(syntax_1.Exact(__1.Any(['note', 'message']))),
     __1.Var('name', __1.GetAny(notes.noteNames)),
 ], ({ name }) => ({
     outputMessage: notes.getNote(name).note,
@@ -205,7 +206,7 @@ exports.createReadNoteNamesCmd = (notes) => __1.createCmd([
     __1.Require(__1.Any(['list'])),
     __1.Ignore(__1.Any(['last', 'past', 'most recent'])),
     __1.Option('count', 20, __1.Numeric()),
-    __1.Require(__1.Any(['notes', 'note'])),
+    __1.Require(syntax_1.Exact(__1.Any(['notes', 'note']))),
 ], ({ count }) => ({
     outputMessage: 'notes, ' + notes.noteNames().slice(0, count).join(', '),
 }), () => 'read note names', Object.assign({}, __1.createCmdMatchSettings(), { autoRunIfFuzzy: true }));
@@ -260,7 +261,7 @@ exports.createLogCmds = (logger) => [
     exports.createListRecentLogsCmd(logger),
 ];
 
-},{"../..":11,"./skills":8,"tslib":93}],8:[function(require,module,exports){
+},{"../..":11,"../../syntax":18,"./skills":8,"tslib":93}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.newLogger = () => {
@@ -320,11 +321,11 @@ const timeUnitTranslator = {
     our: 'hour',
     ours: 'hour',
 };
-const timerNames = ['timer', 'alarm', 'clock'];
+const timerNames = ['time', 'timer', 'alarm', 'clock'];
 const createStartTimerCmd = (alarm) => {
     const syntax = [
         syntax_1.Require(syntax_1.Any(['start', 'set'])),
-        syntax_1.Var('name', syntax_1.StopPhrase(timerNames)),
+        syntax_1.Var('name', syntax_1.Exact(syntax_1.StopPhrase(timerNames))),
         syntax_1.Require(syntax_1.Any(['for'])),
         syntax_1.Var('duration', syntax_1.Numeric()),
         syntax_1.Var('timeUnit', syntax_1.Any(['second', 'seconds', 'minute', 'minutes', 'hour', 'hours', 'our', 'ours'])),
@@ -341,22 +342,16 @@ const createStartTimerCmd = (alarm) => {
         skills_1.startTimer(name, duration * multiplier, () => alarm(`timer ${name} ready, ${name}`));
         return undefined;
     };
-    const describe = ({ name, duration, timeUnit }) => {
-        return `${name} for ${duration} ${timeUnit}`;
-    };
+    const describe = ({ name, duration, timeUnit }) => `${name} for ${duration} ${timeUnit}`;
     return _1.createCmd(syntax, runFunc, describe);
 };
-const createStopTimerCmd = () => {
-    const runFunc = ({ name }) => {
-        skills_1.stopTimer(name);
-        return undefined;
-    };
-    const describe = ({ name }) => `${name} stopped`;
-    return _1.createCmd([
-        syntax_1.Require(syntax_1.Any(['stop', 'end'])),
-        syntax_1.Var('name', syntax_1.StopPhrase(timerNames)),
-    ], runFunc, describe);
-};
+const createStopTimerCmd = () => _1.createCmd([
+    syntax_1.Require(syntax_1.Any(['stop', 'end'])),
+    syntax_1.Var('name', syntax_1.Exact(syntax_1.StopPhrase(timerNames))),
+], ({ name }) => {
+    skills_1.stopTimer(name);
+    return undefined;
+}, ({ name }) => `${name} stopped`);
 exports.createTimerCmds = (alarm) => [
     createStartTimerCmd(alarm),
     createStopTimerCmd(),
@@ -987,6 +982,11 @@ const noneFilter = (phraseBlacklist, preFilter) => {
 const lazyNoneFilter = (phraseBlacklistGenerator, preFilter) => (filteredInput) => {
     return noneFilter(phraseBlacklistGenerator(), preFilter)(filteredInput);
 };
+const precisionFilter = (maxAllowablePenalty, preFilter) => {
+    return (filteredInput) => {
+        return sort_1.trimf(preFilter(filteredInput).filter((interpretation) => interpretation.penalty <= maxAllowablePenalty));
+    };
+};
 const numericFilter = (minNumber = 0, maxNumber = Infinity, preFilter) => (filteredInput) => {
     return preFilter(filteredInput).map((interpretation) => {
         const parsedNumber = numeric_1.wordsToParsedNumber(interpretation.words);
@@ -1061,6 +1061,8 @@ exports.Any = (whitelist, filter = passThruFilter) => anyFilter(whitelist, filte
 exports.GetAny = (whitelistGenerator, filter = passThruFilter) => lazyAnyFilter(whitelistGenerator, filter);
 exports.None = (blacklist, filter = passThruFilter) => noneFilter(blacklist, filter);
 exports.GetNone = (blacklistGenerator, filter = passThruFilter) => lazyNoneFilter(blacklistGenerator, filter);
+exports.Exact = (preFilter) => precisionFilter(0, preFilter);
+exports.Threshold = (maxAllowablePenalty, preFilter) => precisionFilter(maxAllowablePenalty, preFilter);
 exports.Numeric = (min = 0, max = Number.MAX_VALUE, filter = passThruFilter) => numericFilter(min, max, filter);
 
 },{"./numeric":14,"./publicInterfaces":15,"./sort":16,"./text":19,"lodash":90,"util":95}],19:[function(require,module,exports){
