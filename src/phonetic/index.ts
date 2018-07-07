@@ -45,4 +45,5 @@ export const addActivationWord = (activationWords: string[], cmds: Cmd<ParamMap>
 
 export * from './syntax';
 export * from './publicInterfaces';
+export * from './text';
 export { newInterpretter, Interpretter } from './interpretter';

@@ -51,14 +51,10 @@ const notes = require("./phonetic/examples/note/cmd");
 const timers = require("./phonetic/examples/timer/cmd");
 const calculator = require("./phonetic/examples/calculator/cmd");
 const weightConverter = require("./phonetic/examples/weightConverter/cmd");
+tslib_1.__exportStar(require("./falexa"), exports);
+tslib_1.__exportStar(require("./phonetic"), exports);
 exports.Speech = speech;
 exports.Recognition = recognition;
-var falexa_1 = require("./falexa");
-exports.createFalexa = falexa_1.createFalexa;
-exports.falexa = falexa_1.falexa;
-var interpretter_1 = require("./phonetic/interpretter");
-exports.newInterpretter = interpretter_1.newInterpretter;
-tslib_1.__exportStar(require("./phonetic"), exports);
 exports.Examples = {
     Timers: timers,
     Notes: notes,
@@ -66,7 +62,7 @@ exports.Examples = {
     WeightConverter: weightConverter,
 };
 
-},{"./falexa":2,"./io/recognition":4,"./io/speech":5,"./phonetic":12,"./phonetic/examples/calculator/cmd":6,"./phonetic/examples/note/cmd":7,"./phonetic/examples/timer/cmd":9,"./phonetic/examples/weightConverter/cmd":11,"./phonetic/interpretter":14,"tslib":94}],4:[function(require,module,exports){
+},{"./falexa":2,"./io/recognition":4,"./io/speech":5,"./phonetic":12,"./phonetic/examples/calculator/cmd":6,"./phonetic/examples/note/cmd":7,"./phonetic/examples/timer/cmd":9,"./phonetic/examples/weightConverter/cmd":11,"tslib":94}],4:[function(require,module,exports){
 "use strict";
 const getDefaultRecognition = () => {
     const RecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -311,7 +307,7 @@ exports.newNotes = () => {
 Object.defineProperty(exports, "__esModule", { value: true });
 const skills_1 = require("./skills");
 const syntax_1 = require("../../syntax");
-const _1 = require("../../");
+const phonetic_1 = require("../../../phonetic");
 var skills_2 = require("./skills");
 exports.startTimer = skills_2.startTimer;
 exports.stopTimer = skills_2.stopTimer;
@@ -323,7 +319,27 @@ const timeUnitTranslator = {
     ours: 'hour',
 };
 const timerNames = ['timer', 'alarm', 'clock'];
-const createStartTimerCmd = (alarm) => {
+const getTimeInfoString = (name, useShorthand) => {
+    const secsRemaining = skills_1.getSecsRemaining(name);
+    let unitMultiplier = 1;
+    let timeUnit = 'second';
+    let round = Math.floor;
+    if (secsRemaining > 90) {
+        unitMultiplier /= 60;
+        timeUnit = 'minute';
+    }
+    if (secsRemaining > 60 * 90) {
+        unitMultiplier /= 60;
+        timeUnit = 'hour';
+        round = (num) => parseFloat(num.toFixed(1));
+    }
+    const units = round(secsRemaining * unitMultiplier);
+    if (useShorthand) {
+        return `${name} ${units} ${timeUnit}${units === 1 ? '' : 's'}`;
+    }
+    return `${units} ${timeUnit}${units === 1 ? '' : 's'} remaining for ${name}`;
+};
+exports.createStartTimerCmd = (alarm) => {
     const syntax = [
         syntax_1.Require(syntax_1.Any(['start', 'set'])),
         syntax_1.Var('name', syntax_1.StopPhrase(timerNames)),
@@ -346,7 +362,7 @@ const createStartTimerCmd = (alarm) => {
     const describe = ({ name, duration, timeUnit }) => {
         return `${name} for ${duration} ${timeUnit}`;
     };
-    return _1.createCmd(syntax, runFunc, describe);
+    return phonetic_1.createCmd(syntax, runFunc, describe);
 };
 const createStopTimerCmd = () => {
     const runFunc = ({ name }) => {
@@ -354,18 +370,46 @@ const createStopTimerCmd = () => {
         return undefined;
     };
     const describe = ({ name }) => `${name} stopped`;
-    return _1.createCmd([
+    return phonetic_1.createCmd([
         syntax_1.Require(syntax_1.Any(['stop', 'end'])),
         syntax_1.Var('name', syntax_1.StopPhrase(timerNames)),
     ], runFunc, describe);
 };
+exports.createTimerInfoCmd = () => {
+    const runFunc = ({ name }) => ({
+        outputMessage: getTimeInfoString(name, false),
+    });
+    const describe = (params) => getTimeInfoString(params.name, true);
+    return phonetic_1.createCmd([
+        syntax_1.Require(syntax_1.Any(['get', 'give', 'how much'])),
+        syntax_1.Require(syntax_1.Any([
+            'time remaining', 'time remains', 'time is remaining',
+            'time left', 'time is left'
+        ])),
+        syntax_1.Ignore(syntax_1.Any(['for'])),
+        syntax_1.Var('name', syntax_1.Sentence()),
+    ], runFunc, describe, phonetic_1.createCmdMatchSettings(false, true));
+};
+exports.createTimerStatsCmd = () => {
+    const runFunc = () => ({
+        outputMessage: skills_1.getActiveTimerNames().map((timerName) => getTimeInfoString(timerName, true)).join(' '),
+    });
+    const describe = () => `list timer stats`;
+    return phonetic_1.createCmd([
+        syntax_1.Require(syntax_1.Any(['list', 'read', 'get'])),
+        syntax_1.Var('name', syntax_1.Any(['timer stats', 'timer status', 'timers'])),
+    ], runFunc, describe, phonetic_1.createCmdMatchSettings(false, true));
+};
 exports.createTimerCmds = (alarm) => [
-    createStartTimerCmd(alarm),
+    exports.createStartTimerCmd(alarm),
     createStopTimerCmd(),
+    exports.createTimerInfoCmd(),
+    exports.createTimerStatsCmd(),
 ];
 
-},{"../../":12,"../../syntax":19,"./skills":10}],10:[function(require,module,exports){
+},{"../../../phonetic":12,"../../syntax":19,"./skills":10}],10:[function(require,module,exports){
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const timers = {};
 const ensureStopped = (name) => {
     const timer = timers[name];
@@ -388,9 +432,21 @@ const startTimer = (name, millis, callbackFunc) => {
 const stopTimer = (name) => {
     ensureStopped(name);
 };
+exports.getSecsRemaining = (name) => {
+    const timer = timers[name];
+    if (!timer) {
+        return Number.NaN;
+    }
+    return (timer.ending - (new Date()).getTime()) / 1000;
+};
+exports.getActiveTimerNames = () => {
+    return Object.keys(timers);
+};
 module.exports = {
     startTimer,
     stopTimer,
+    getSecsRemaining: exports.getSecsRemaining,
+    getActiveTimerNames: exports.getActiveTimerNames,
 };
 
 },{}],11:[function(require,module,exports){
@@ -483,10 +539,11 @@ exports.addActivationWord = (activationWords, cmds) => {
 };
 tslib_1.__exportStar(require("./syntax"), exports);
 tslib_1.__exportStar(require("./publicInterfaces"), exports);
+tslib_1.__exportStar(require("./text"), exports);
 var interpretter_1 = require("./interpretter");
 exports.newInterpretter = interpretter_1.newInterpretter;
 
-},{"./interpretter":14,"./publicInterfaces":16,"./syntax":19,"tslib":94}],13:[function(require,module,exports){
+},{"./interpretter":14,"./publicInterfaces":16,"./syntax":19,"./text":20,"tslib":94}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const _ = require("lodash");
@@ -651,6 +708,10 @@ function interpretCmd(cmd, words) {
         cmd,
     };
 }
+const emptyCmdResponse = {
+    contextualCmds: [],
+    outputMessage: '',
+};
 function isCmdResponse(response) {
     return response.outputMessage !== undefined;
 }
@@ -663,7 +724,7 @@ function runCmd(cmd, runParams) {
         if (isCmdResponse(runResponse)) {
             return runResponse;
         }
-        if (isCmdListResponse(runResponse)) {
+        else if (isCmdListResponse(runResponse)) {
             return {
                 outputMessage: interactSkills_1.defaultCmdDescription({ cmd, runParams }) + ' done',
                 contextualCmds: runResponse,
@@ -717,10 +778,6 @@ function topCmdInterpretationsToRunnables(interpretations) {
         runParams: cmdInterpretationToRunParams(cmdInterpretation.topInterpretations[0]),
     }));
 }
-const emptyCmdResponse = {
-    contextualCmds: [],
-    outputMessage: '',
-};
 const interpretCmds = (cmds, words) => {
     const interpretationsByCmd = cmds.map((cmd) => interpretCmd(cmd, words));
     const exactInterpretationsByCmd = interpretationsByCmd.filter((interpretation) => interpretation.minPenalty === 0)
@@ -733,7 +790,7 @@ const interpretCmds = (cmds, words) => {
         topExactMatches.forEach((m) => {
             console.log(JSON.stringify(m.runParams));
         });
-        return interactSkills_1.createClarificationResponse(topExactMatches);
+        return Object.assign({}, interactSkills_1.createClarificationResponse(topExactMatches));
     }
     const fuzzyInterpretations = interpretationsByCmd.filter((cmdInterpretation) => !cmdInterpretation.cmd.matchSettings.ignoreFuzzyMatches && cmdInterpretation.minPenalty < Infinity);
     const topFuzzyMatches = topCmdInterpretationsToRunnables(fuzzyInterpretations);
@@ -765,20 +822,42 @@ const createDefaultPrioritizedCmds = (lastInterpretation) => {
         interactSkills_1.createRepeatCmd(getOutputMessage(lastInterpretation)),
     ];
 };
-const _newInterpretter = (cmds, prioritizedCmds = [], interpretation) => ({
-    getOutputMessage() {
-        return getOutputMessage(interpretation);
-    },
-    getContextualCmds() { return [...prioritizedCmds]; },
-    interpret(txt) {
-        const nextInterpretation = interpretPrioritizedCmds(prioritizedCmds, cmds, txt);
-        const nextContextualCmds = [
-            ...(nextInterpretation.contextualCmds === undefined ? [] : nextInterpretation.contextualCmds),
-            ...createDefaultPrioritizedCmds(nextInterpretation),
-        ];
-        return _newInterpretter(cmds, nextContextualCmds, nextInterpretation);
-    },
-});
+const _newInterpretter = (cmds, prioritizedCmds = [], interpretation) => {
+    let curPrioritizedCmds = prioritizedCmds;
+    let curInterpretation = interpretation;
+    const bindFutureResponse = (asyncResponse) => {
+        if (asyncResponse.laterResponse !== undefined) {
+            asyncResponse.laterResponse.then((response) => {
+                curInterpretation = response;
+                if (response.contextualCmds !== undefined) {
+                    curPrioritizedCmds = response.contextualCmds;
+                }
+                else {
+                    curPrioritizedCmds = [];
+                }
+                bindFutureResponse(response);
+            })
+                .catch(() => { });
+        }
+    };
+    if (curInterpretation !== undefined) {
+        bindFutureResponse(curInterpretation);
+    }
+    return {
+        getOutputMessage() {
+            return getOutputMessage(curInterpretation);
+        },
+        getContextualCmds() { return [...curPrioritizedCmds]; },
+        interpret(txt) {
+            const nextInterpretation = interpretPrioritizedCmds(curPrioritizedCmds, cmds, txt);
+            const nextContextualCmds = [
+                ...(nextInterpretation.contextualCmds === undefined ? [] : nextInterpretation.contextualCmds),
+                ...createDefaultPrioritizedCmds(nextInterpretation),
+            ];
+            return _newInterpretter(cmds, nextContextualCmds, nextInterpretation);
+        },
+    };
+};
 exports.newInterpretter = (cmds) => _newInterpretter(cmds);
 
 },{"./interactSkills":13,"./sort":17,"./text":20,"lodash":91}],15:[function(require,module,exports){

@@ -5,12 +5,10 @@ import * as timers from './phonetic/examples/timer/cmd';
 import * as calculator from './phonetic/examples/calculator/cmd';
 import * as weightConverter from './phonetic/examples/weightConverter/cmd';
 
+export * from './falexa';
+export * from './phonetic'
 export const Speech = speech
 export const Recognition = recognition
-
-export { createFalexa, falexa } from './falexa';
-export { newInterpretter } from './phonetic/interpretter'
-export * from './phonetic'
 
 export const Examples = {
     Timers: timers,

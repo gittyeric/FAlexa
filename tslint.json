@@ -9,6 +9,7 @@
   ],
   "rules": {
     "mocha-no-side-effect-code": false,
+    "no-multiline-string": false,
     "no-unused-expression": false,
     "no-empty": false,
     "space-within-parens": false,

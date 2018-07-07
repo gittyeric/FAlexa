@@ -21,12 +21,13 @@ export interface Cmd<P extends ParamMap> {
     runFunc(params: P): RunResponse,
 }
 
-export type RunResponse = undefined | CmdResponse | Cmd<ParamMap>[]
-
 export interface CmdResponse {
     contextualCmds?: Cmd<ParamMap>[], // Cmds that are only available after this one runs
     outputMessage?: string, // The message to output after running
+    laterResponse?: Promise<CmdResponse>, // Async-triggered overwriting of current response
 }
+
+export type RunResponse = undefined | CmdResponse | Cmd<ParamMap>[]
 
 export interface CmdMatchSettings {
     
