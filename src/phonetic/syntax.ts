@@ -1,6 +1,6 @@
 import {
     Filter, Directive,
-    ParamMap, VarType, ParamValue
+    ParamMap, VarType, ParamValue,
 } from './publicInterfaces';
 import { FilterInterpretation, FilterInterpretations, DirectiveInterpretation, DirectiveInterpretations } from './moduleInterfaces';
 import { matchWordsToPhrase, phoneticPhraseDistance } from './text';
@@ -237,7 +237,7 @@ const lazyNoneFilter = (phraseBlacklistGenerator: () => string[], preFilter: Fil
 const precisionFilter = (maxAllowablePenalty: number, preFilter: Filter) => {
     return (filteredInput: FilterInterpretations): FilterInterpretations => {
         return trimf(preFilter(filteredInput).filter((interpretation: FilterInterpretation) =>
-            interpretation.penalty <= maxAllowablePenalty
+            interpretation.penalty <= maxAllowablePenalty,
         ))
     }
 }
