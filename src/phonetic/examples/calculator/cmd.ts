@@ -21,9 +21,9 @@ export const createAddCmd = (): Cmd<CalcParams> =>
 
 export const createMultiplyCmd = (): Cmd<CalcParams> => 
     createCmd([
-            Require(Exact(Any(['multiply']))),
+            Require(Any(['multiply', 'multiple'])),
             Var('arg1', Numeric()),
-            Require(Any(['and', 'to', 'with', 'times'])),
+            Require(Any(['and', 'with', 'times'])),
             Var('arg2', Numeric()),
         ], ({arg1, arg2}: CalcParams) => ({
             outputMessage: `${arg1 * arg2}`,
@@ -37,7 +37,7 @@ export const createDivideCmd = (): Cmd<CalcParams> =>
             Require(Any(['and', 'to', 'with', 'by'])),
             Var('arg2', Numeric()),
         ], ({arg1, arg2}: CalcParams) => ({
-            outputMessage: `${arg1 * arg2}`,
+            outputMessage: `${arg1 / arg2}`,
         }), () => 'divide', createCmdMatchSettings(false, true),
     )
 
@@ -45,7 +45,7 @@ export const createSubtractCmd = (): Cmd<CalcParams> =>
     createCmd([
             Require(Exact(Any(['subtract', 'sub track']))),
             Var('arg1', Numeric()),
-            Require(Any(['and', 'to', 'with', 'by', 'minus'])),
+            Require(Any(['and', 'to', 'with', 'from', 'by', 'minus'])),
             Var('arg2', Numeric()),
         ], ({arg1, arg2}: CalcParams) => ({
             outputMessage: `${arg1 - arg2}`,

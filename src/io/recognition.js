@@ -6,7 +6,7 @@ const getDefaultRecognition = () => {
     recognition.lang = 'en-US';
     recognition.interimResults = false;
     recognition.maxAlternatives = 3;
-    recognition.continuous = true;
+    recognition.continuous = false;
 
     return recognition;
 }

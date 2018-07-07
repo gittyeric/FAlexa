@@ -36,12 +36,15 @@ export const matchWordsToPhrase = (words: string[], phrase: string): string[] =>
 
 export const txtToValidWords = (txt: string) => {
     return txt
-        .toLowerCase()
+        .toLowerCase() // Spoken words can't induce capitalization (mostly)
+        // Desperately try to convert certain characters into something meaningful.
+        // Ideally this wouldn't be in the input to begin with
         .replace(/\+/g, ' plus ')
-        .replace(/\-/g, ' minus ')
-        .replace(/\&/g, ' and ')
-        .replace(/\@/g, ' at ')
-        .replace(/[^a-z0-9\. ]/g, ' ')
+        .replace(/\-\s*([0-9]+)/g, ' negative $1')
+        .replace(/\s\&\s/g, ' and ')
+        .replace('=', ' equals ')
+        .replace(/[^a-z0-9\. ]/g, ' ') // Nuke the rest!
+
         .split(' ')
         .map((word: string) => word.trim())
         .filter((word: string) => word.length > 0)
