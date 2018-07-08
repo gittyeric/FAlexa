@@ -220,7 +220,7 @@ exports.createNoteCmds = (notes) => [
 exports.createLogCmd = (logger) => {
     return __1.createCmd([
         __1.Ignore(__1.Any(['add', 'push', 'append'])),
-        __1.Require(__1.Any(['log'])),
+        __1.Require(syntax_1.Exact(__1.Any(['log']))),
         __1.Ignore(__1.Any(['note', 'message'])),
         __1.Var('message', __1.Sentence()),
     ], ({ message }) => {
@@ -233,7 +233,7 @@ exports.createPopLogCmd = (logger) => {
     return __1.createCmd([
         __1.Require(__1.Any(['pop', 'remove', 'delete', 'clear'])),
         __1.Ignore(__1.Any(prevLogWhitelist)),
-        __1.Ignore(__1.Any(['log'])),
+        __1.Ignore(syntax_1.Exact(__1.Any(['log']))),
     ], () => {
         const popped = logger.popLastLog();
         return {
@@ -248,7 +248,7 @@ exports.createListRecentLogsCmd = (logger) => {
         __1.Require(__1.Any(['list', 'read'])),
         __1.Ignore(__1.Any(prevLogWhitelist)),
         __1.Option('count', 2, __1.Numeric()),
-        __1.Require(__1.Any(['log', 'logs'])),
+        __1.Require(syntax_1.Exact(__1.Any(['log', 'logs']))),
     ], ({ count }) => {
         const recentLogs = logger.recentLogs(count);
         const outputMessage = recentLogs.map((log, i) => `${i + 1} ${log.note}`).join(', ');

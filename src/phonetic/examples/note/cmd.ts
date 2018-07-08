@@ -84,7 +84,7 @@ interface LogParams extends ParamMap{
 export const createLogCmd = (logger: Logger): Cmd<LogParams> => {
     return createCmd([
         Ignore(Any(['add', 'push', 'append'])),
-        Require(Any(['log'])),
+        Require(Exact(Any(['log']))),
         Ignore(Any(['note', 'message'])),
         Var('message', Sentence()),
     ],
@@ -102,7 +102,7 @@ export const createPopLogCmd = (logger: Logger): Cmd<ParamMap> => {
     return createCmd([
         Require(Any(['pop', 'remove', 'delete', 'clear'])),
         Ignore(Any(prevLogWhitelist)),
-        Ignore(Any(['log'])),
+        Ignore(Exact(Any(['log']))),
     ],
     () => {
         const popped = logger.popLastLog()
@@ -121,7 +121,7 @@ export const createListRecentLogsCmd = (logger: Logger): Cmd<CountParam> => {
         Require(Any(['list', 'read'])),
         Ignore(Any(prevLogWhitelist)),
         Option('count', 2, Numeric()),
-        Require(Any(['log', 'logs'])),
+        Require(Exact(Any(['log', 'logs']))),
     ],
     ({ count }: CountParam) => {
         const recentLogs = logger.recentLogs(count)
