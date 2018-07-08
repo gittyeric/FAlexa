@@ -42,11 +42,27 @@ multiplierBot.startListening();
 
 ## Frontend Installation
 
-Grab [dist/falexa.browser.min.js](dist/falexa.browser.min.js) and add it to your HTML:
+Grab [dist/falexa.browser.min.js](https://github.com/gittyeric/FAlexa/blob/master/dist/falexa.browser.min.js) and add it to your HTML:
 
 <script src="path/to/falexa.browser.min.js"></script>
 
 This adds "Falexa" to Javascript globally; now you can run the example above!
+
+## NPM Installation
+
+```
+npm install falexa
+```
+
+You can now import everything you need for the example above:
+```
+import {
+    falexa, 
+    createCmd,
+    Require, Var, // directives
+    Any, Numeric, // filters
+} from 'falexa';
+```
 
 ## Installation for Development and Modification
 
@@ -135,4 +151,4 @@ Assume the minimum penalty across each words / VarType duplicate interpretation
 
 ### Custom Filters
 
-Creating your own filter is pretty easy, check out how it's done in [syntax.ts](src/phonetic/syntax.ts)!
+Creating your own filter is pretty easy, check out how it's done in [syntax.ts](https://github.com/gittyeric/FAlexa/blob/master/src/phonetic/syntax.ts)!
