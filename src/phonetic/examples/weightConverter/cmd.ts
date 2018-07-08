@@ -46,7 +46,7 @@ export interface TranslateMap {
 const toTrueUnit: TranslateMap = {
     oz: 'oz', ounce: 'oz', ounces: 'oz',
     pound: 'lb', pounds: 'lb', lb: 'lb', lbs: 'lb',
-    gram: 'gram', grams: 'gram', graham: 'gram', grahams: 'gram',
+    g: 'gram', gram: 'gram', grams: 'gram', graham: 'gram', grahams: 'gram',
 };
 const spokenUnits = Object.keys(toTrueUnit)
 const toVerbalMap: TranslateMap = {
@@ -59,7 +59,7 @@ const getConvertedOutputMessage = ({amount, inputUnit, outputUnit}: ConvertParam
         inputUnit: toTrueUnit[inputUnit],
         outputUnit: toTrueUnit[outputUnit],
     };
-    const converted = convertWeightUnit(absParams)
+    const converted = convertWeightUnit(absParams).toFixed(2)
 
     return `${converted} ${toVerbalMap[absParams.outputUnit]} equal ${amount} ${toVerbalMap[absParams.inputUnit]}`
 };

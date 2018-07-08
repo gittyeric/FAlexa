@@ -479,7 +479,7 @@ const convertWeightUnit = ({ amount, inputUnit, outputUnit }) => {
 const toTrueUnit = {
     oz: 'oz', ounce: 'oz', ounces: 'oz',
     pound: 'lb', pounds: 'lb', lb: 'lb', lbs: 'lb',
-    gram: 'gram', grams: 'gram', graham: 'gram', grahams: 'gram',
+    g: 'gram', gram: 'gram', grams: 'gram', graham: 'gram', grahams: 'gram',
 };
 const spokenUnits = Object.keys(toTrueUnit);
 const toVerbalMap = {
@@ -491,7 +491,7 @@ const getConvertedOutputMessage = ({ amount, inputUnit, outputUnit }) => {
         inputUnit: toTrueUnit[inputUnit],
         outputUnit: toTrueUnit[outputUnit],
     };
-    const converted = convertWeightUnit(absParams);
+    const converted = convertWeightUnit(absParams).toFixed(2);
     return `${converted} ${toVerbalMap[absParams.outputUnit]} equal ${amount} ${toVerbalMap[absParams.inputUnit]}`;
 };
 exports.createConvertWeightCmd = () => __1.createCmd([
