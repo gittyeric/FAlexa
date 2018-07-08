@@ -24,7 +24,7 @@ const stopTimer = (name) => {
     ensureStopped(name);
 };
 
-export const getSecsRemaining = (name) => {
+const getSecsRemaining = (name) => {
     const timer = timers[name];
     if (!timer) {
         return Number.NaN;
@@ -32,7 +32,7 @@ export const getSecsRemaining = (name) => {
     return (timer.ending - (new Date()).getTime()) / 1000;
 };
 
-export const getActiveTimerNames = () => {
+const getActiveTimerNames = () => {
     return Object.keys(timers);
 };
 

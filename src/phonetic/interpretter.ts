@@ -1,12 +1,14 @@
 import {
     Cmd, CmdMatchSettings,
-    Directive, ParamMap, RunResponse, CmdResponse,
+    Directive, ParamMap, RunResponse, CmdResponse, ParamValue,
 } from './publicInterfaces';
 import { RunnableCmd, DirectiveInterpretation, DirectiveInterpretations } from './moduleInterfaces';
 import { trimd } from './sort';
-import { filterFirstStopwords, txtToValidWords } from './text';
+import { filterFirstStopwords, txtToValidWords, trimFirstStopwords } from './text';
 import { createClarificationResponse, defaultCmdDescription, createRepeatCmd } from './interactSkills';
 import { cloneDeep } from 'lodash';
+import { stopwords } from './stopwords';
+import { isString } from 'util';
 
 export type SyntaxInterpretation<P extends ParamMap> = DirectiveInterpretations<P>
 export type SyntaxInterpretations<P extends ParamMap> = SyntaxInterpretation<P>[]
@@ -23,22 +25,22 @@ function interpretDirective<P extends ParamMap>
     (directive: Directive<P>, words: string[], paramMap: P, settings: CmdMatchSettings): DirectiveInterpretations<P> {
     const interpretAttempt = directive(words, cloneDeep(paramMap), settings.maxFuzzyFilterResults)
 
-    // Don't let stopwords prevent directives from breaking
-    if (interpretAttempt.length === 0) {
-        const matchingStopwords = filterFirstStopwords(words, 1)
-        if (matchingStopwords.length > 0) {
-            const withoutStopwords = words.slice(matchingStopwords.length)
-            return interpretDirective(directive, withoutStopwords, cloneDeep(paramMap), settings)
+    // For every next stopword, consider the literal interpretation as well as
+    // the interpretation after skipping the stopword
+    if (words.length > 1 && stopwords.indexOf(words[0]) >= 0) {
+        return trimd([
+            ...interpretAttempt,
+            ...interpretDirective(directive, words.slice(1), cloneDeep(paramMap), settings)
                 .map((interpretation: DirectiveInterpretation<P>) =>
                     ({
                         ...interpretation,
                         filterInterpretation: {
                             ...interpretation.filterInterpretation,
                             // Add back the consumed stopword count
-                            consumed: interpretation.filterInterpretation.consumed + matchingStopwords.length,
+                            consumed: interpretation.filterInterpretation.consumed + 1,
                         },
-                    }))
-        }
+                    })),
+        ], settings.maxFuzzyDirectives)
     }
 
     return trimd(interpretAttempt, settings.maxFuzzyDirectives)
@@ -130,18 +132,53 @@ function interpretSyntax<P extends ParamMap>(syntax: Directive<P>[], words: stri
     return sortAndFlatten(validInterpretations)
 }
 
-interface SeenParams { [index: string]: boolean }
+const paramAsString = (param: ParamValue): string | undefined => isString(param) ? param : undefined
+
+const getParamsFromSyntax = <P extends ParamMap>(interpretation: SyntaxInterpretation<P>): P => 
+    interpretation[interpretation.length - 1].runParams
+
+const getWordsCount = <P extends ParamMap>(paramMap: P) => 
+    Object.keys(paramMap)
+        .map((name: string) => paramAsString(paramMap[name]))
+        .filter((paramStr?: string) => isString(paramStr))
+        .map((paramStr: string) => paramStr.split(' ').length)
+        .reduce((total: number, wordCount: number) => total + wordCount, 0)
+
+interface SeenParams<P extends ParamMap> { [hash: string]: DirectiveInterpretation<P>[] }
 function deduplicateSyntaxInterpretations<P extends ParamMap>
-    (syntaxInterpretations: SyntaxInterpretations<P>): SyntaxInterpretations<P> {
-    const seenParamMaps: SeenParams = {}
-    return syntaxInterpretations.filter((interpretation: SyntaxInterpretation<P>) => {
-        const paramSignature = JSON.stringify(interpretation[interpretation.length - 1].runParams)
-        if (seenParamMaps[paramSignature] !== undefined) {
-            return false
-        }
-        seenParamMaps[paramSignature] = true
-        return true
+    (syntaxInterpretations: SyntaxInterpretations<P>, trimPrefixStopwords: boolean): SyntaxInterpretations<P> {
+    const seenParamMaps: SeenParams<P> = {}
+    const seenNonStopwordHashes: SeenParams<P> = {}
+
+    // First, deduplicate by equal paramMaps, since these are functionally equivalent from this point on
+    syntaxInterpretations.filter((interpretation: SyntaxInterpretation<P>) => {
+        const paramSignature = JSON.stringify(getParamsFromSyntax(interpretation))
+        const exists = seenParamMaps[paramSignature] !== undefined
+        seenParamMaps[paramSignature] = interpretation
+        return !exists
     })
+    // Then, filter by results that differ only by stopwords.  Prefer to keep the most or least stopwords
+    // based on settings
+    .forEach((interpretation: SyntaxInterpretation<P>) => {
+        const params = getParamsFromSyntax(interpretation)
+        const stopAgnosticSignature = JSON.stringify(
+            Object.keys(params)
+                .map((paramName: string) => paramAsString(params[paramName]))
+                .map((paramStr: string | undefined) => isString(paramStr) ? paramStr : '')
+                .map((paramStr: string) => trimFirstStopwords(paramStr.split(' '))),
+        )
+
+        // If 2 interpretations differ only by stopwords, throw 1 out based on trimPrefixStopwords
+        const existing = seenNonStopwordHashes[stopAgnosticSignature]
+        const overwriteExisting = existing === undefined || 
+            (trimPrefixStopwords && getWordsCount(getParamsFromSyntax(existing)) > getWordsCount(params))
+
+        if (overwriteExisting) {
+            seenNonStopwordHashes[stopAgnosticSignature] = interpretation
+        }
+    })
+
+    return Object.keys(seenNonStopwordHashes).map((hash: string) => seenNonStopwordHashes[hash])
 }
 
 function interpretCmd<P extends ParamMap>(cmd: Cmd<P>, words: string[]): CmdInterpretation<P> {
@@ -160,7 +197,7 @@ function interpretCmd<P extends ParamMap>(cmd: Cmd<P>, words: string[]): CmdInte
     return {
         minPenalty,
         topInterpretations: interprettedSyntaxes === null ? [] :
-            deduplicateSyntaxInterpretations(interprettedSyntaxes),
+            deduplicateSyntaxInterpretations(interprettedSyntaxes, cmd.matchSettings.trimPrefixStopwords),
         cmd,
     }
 }
@@ -300,7 +337,7 @@ const interpretCmds = (cmds: Cmd<ParamMap>[], words: string[]): CmdResponse => {
     return emptyCmdResponse
 }
 
-const interpretPrioritizedCmds = (priorityCmds: Cmd<ParamMap>[], cmds: Cmd<ParamMap>[], txt: string) => {
+const interpretAllCmds = (priorityCmds: Cmd<ParamMap>[], cmds: Cmd<ParamMap>[], txt: string) => {
     const words = txtToValidWords(txt)
     const exactPriorityCmds = priorityCmds.map((cmd: Cmd<ParamMap>): Cmd<ParamMap> =>
         ({
@@ -341,7 +378,7 @@ const _newInterpretter = (
 
     let curPrioritizedCmds = prioritizedCmds
     let curInterpretation = interpretation
-    
+
     const bindFutureResponse = (asyncResponse: CmdResponse) => {
         if (asyncResponse.laterResponse !== undefined) {
             asyncResponse.laterResponse.then((response: CmdResponse) => {
@@ -354,11 +391,11 @@ const _newInterpretter = (
                 }
                 bindFutureResponse(response)
             })
-            .catch(() => { })
+                .catch(() => { })
         }
     }
 
-    if (curInterpretation !== undefined){
+    if (curInterpretation !== undefined) {
         bindFutureResponse(curInterpretation)
     }
 
@@ -371,12 +408,12 @@ const _newInterpretter = (
         getContextualCmds(): Cmd<ParamMap>[] { return [...curPrioritizedCmds] },
 
         interpret(txt: string): Interpretter {
-            const nextInterpretation = interpretPrioritizedCmds(curPrioritizedCmds, cmds, txt)
+            const nextInterpretation = interpretAllCmds(curPrioritizedCmds, cmds, txt)
             const nextContextualCmds = [
                 ...(nextInterpretation.contextualCmds === undefined ? [] : nextInterpretation.contextualCmds),
                 ...createDefaultPrioritizedCmds(nextInterpretation),
             ]
-            
+
             return _newInterpretter(
                 cmds,
                 nextContextualCmds,

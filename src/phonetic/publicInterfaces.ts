@@ -54,6 +54,11 @@ export interface CmdMatchSettings {
     // useful for dangerous operations.
     // Defaults to false cuz we crazy like that
     alwaysAsk: boolean,
+
+    // For any ambiguous match, trim all words up to the first non-stopword.
+    // Trimmed stopwords will be ignored
+    // Defaults to false
+    trimPrefixStopwords: boolean,
 }
 
 export type ParamValue = string | number | undefined

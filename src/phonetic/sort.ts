@@ -5,6 +5,7 @@ import { FilterInterpretations, FilterInterpretation, DirectiveInterpretation } 
 interface Penalizable {
     penalty: number,
     maxResults: number,
+    words: string[],
 }
 type ToPenalizable<INPUT> = (convertable: INPUT) => Penalizable
 
@@ -16,7 +17,10 @@ export function trim<P>(filtered: P[], convert: ToPenalizable<P>): P[] {
         trimmed.sort((a: P, b: P) => {
             const ap = convert(a)
             const bp = convert(b)
-            return ap.penalty === bp.penalty ? 0 :
+
+            // Sort by ascending penalty, break ties by descending word count
+            return ap.penalty === bp.penalty ? 
+                (ap.words.length === bp.words.length ? 0 : ap.words.length > bp.words.length ? -1 : 1) :
                 (ap.penalty > bp.penalty ? 1 : -1)
         })
         trimmed.slice(0, convert(possible[0]).maxResults)

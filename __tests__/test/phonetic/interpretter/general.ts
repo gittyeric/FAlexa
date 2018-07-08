@@ -62,17 +62,17 @@ describe('strictness of interpretation', () => {
 
 describe('Match Tie breaking', () => {
     const shortCmd = createCmd([
-            Require(Any(['first'])),
-            Var('v', Sentence()),
-        ], 
+        Require(Any(['first'])),
+        Var('v', Sentence()),
+    ],
         () => undefined,
         () => 'short',
     )
     const longCmd = createCmd([
-            Require(Any(['first'])),
-            Require(Any(['second'])),
-            Var('v', Sentence()),
-        ], 
+        Require(Any(['first'])),
+        Require(Any(['second'])),
+        Var('v', Sentence()),
+    ],
         () => undefined,
         () => 'long',
     )

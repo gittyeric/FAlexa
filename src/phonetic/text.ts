@@ -25,6 +25,9 @@ export const filterFirstStopwords = (words: string[], maxReturned: number = Infi
     return matchedStopwords
 }
 
+export const trimFirstStopwords = (words: string[]) => 
+    words.slice(filterFirstStopwords(words).length)
+
 export const matchWordsToPhrase = (words: string[], phrase: string): string[] => {
     const wordCount = phrase.split(' ').length
     const matched = []

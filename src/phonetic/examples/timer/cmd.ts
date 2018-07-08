@@ -1,16 +1,15 @@
-import {
-    startTimer,
-    stopTimer,
-    getSecsRemaining,
-    getActiveTimerNames,
-} from './skills';
+import { ParamMap, Cmd } from '../../publicInterfaces';
+import { Require, Any, Var, Numeric, StopPhrase, Ignore, Exact, Sentence } from '../../syntax';
+import { createCmdMatchSettings, createCmd } from '../..';
 
-import { Var, Require, Any, StopPhrase, Numeric, Sentence, Ignore } from '../../syntax';
-import { Cmd, ParamMap } from '../../publicInterfaces';
-import { createCmd, createCmdMatchSettings } from '../../../phonetic';
-
-// Export Skills
-export { startTimer, stopTimer } from './skills';
+// tslint:disable-next-line:no-require-imports no-unsafe-any
+export const startTimer = <(name: string, durationMs: number, alert: () => void) => void>(require('./skills').startTimer);
+// tslint:disable-next-line:no-require-imports no-unsafe-any
+export const stopTimer = <(name: string) => void>(require('./skills').stopTimer);
+// tslint:disable-next-line:no-require-imports no-unsafe-any
+const getSecsRemaining = <(name: string) => number>(require('./skills').getSecsRemaining);
+// tslint:disable-next-line:no-require-imports no-unsafe-any
+const getActiveTimerNames = <() => string[]>(require('./skills').getActiveTimerNames);
 
 // Convert time unit synonyms
 interface TimeUnitTranslater { [index: string]: string }
@@ -32,7 +31,7 @@ interface TimerNameParam extends ParamMap {
     name: string,
 }
 
-const timerNames = ['timer', 'alarm', 'clock']
+const timerNames = ['time', 'timer', 'alarm', 'clock']
 
 const getTimeInfoString = (name: string, useShorthand: boolean) => {
     const secsRemaining = getSecsRemaining(name)
@@ -58,7 +57,7 @@ const getTimeInfoString = (name: string, useShorthand: boolean) => {
 export const createStartTimerCmd = (alarm: (alertMsg: string) => void): Cmd<TimerStartParams> => {
     const syntax = [
         Require(Any(['start', 'set'])),
-        Var('name', StopPhrase(timerNames)),
+        Var('name', Exact(StopPhrase(timerNames))),
         Require(Any(['for'])),
         Var('duration', Numeric()),
         Var('timeUnit', Any(['second', 'seconds', 'minute', 'minutes', 'hour', 'hours', 'our', 'ours'])),
@@ -78,27 +77,24 @@ export const createStartTimerCmd = (alarm: (alertMsg: string) => void): Cmd<Time
         return undefined
     }
 
-    const describe = ({ name, duration, timeUnit }: TimerStartParams) => {
-        return `${name} for ${duration} ${timeUnit}`
-    }
+    const describe = ({ name, duration, timeUnit }: TimerStartParams) => 
+        `${name} for ${duration} ${timeUnit}`
 
     return createCmd(syntax, runFunc, describe)
 }
 
-const createStopTimerCmd = (): Cmd<TimerNameParam> => {
-    const runFunc = ({ name }: TimerNameParam): undefined => {
-        stopTimer(name)
-        return undefined
-    }
-    const describe = ({ name }: TimerNameParam) => 
-        `${name} stopped`
-
-    return createCmd<TimerNameParam>([
+export const createStopTimerCmd = (): Cmd<TimerNameParam> => 
+    createCmd<TimerNameParam>([
             Require(Any(['stop', 'end'])),
-            Var('name', StopPhrase(timerNames)),
-        ], runFunc, describe,
+            Var('name', Exact(StopPhrase(timerNames))),
+        ], 
+        ({ name }: TimerNameParam): undefined => {
+            stopTimer(name)
+            return undefined
+        },
+        ({ name }: TimerNameParam) => 
+            `${name} stopped`,
     )
-}
 
 export const createTimerInfoCmd = (): Cmd<TimerNameParam> => {
     const runFunc = ({ name }: TimerNameParam) => ({

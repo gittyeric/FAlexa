@@ -2,6 +2,7 @@ import { ParamMap, Cmd, RunResponse } from '../../publicInterfaces';
 import { Any, Require, Var, StopPhrase, Numeric, Sentence, createCmd, 
     GetAny, Ignore, Option, createCmdMatchSettings } from '../..';
 import { Log, Notes, Logger } from './skills';
+import { Exact } from '../../syntax';
 
 // Export Skills
 export * from './skills';
@@ -23,7 +24,7 @@ export interface CountParam extends ParamMap {
 export const createSaveNoteCmd = (notes: Notes): Cmd<SaveNoteParams> => 
     createCmd([
         Require(Any(['save', 'take'])),
-        Require(Any(['note', 'message'])),
+        Require(Exact(Any(['note', 'message']))),
         Var('name', StopPhrase(['with'])),
         Var('note', Sentence()),
     ],
@@ -39,7 +40,7 @@ export const createReadNoteCmd = (notes: Notes): Cmd<NoteNameParam> =>
     createCmd(
         [
             Require(Any(['get', 'read', 'play'])),
-            Require(Any(['note', 'message'])),
+            Require(Exact(Any(['note', 'message']))),
             Var('name', GetAny(notes.noteNames)),
         ], 
         ({ name }: NoteNameParam): RunResponse => ({
@@ -56,7 +57,7 @@ export const createReadNoteNamesCmd = (notes: Notes): Cmd<CountParam> =>
         Require(Any(['list'])), 
         Ignore(Any(['last', 'past', 'most recent'])), 
         Option('count', 20, Numeric()), 
-        Require(Any(['notes', 'note'])),
+        Require(Exact(Any(['notes', 'note']))),
     ],
     ({ count }: CountParam) => ({
         outputMessage: 'notes, ' + notes.noteNames().slice(0, count).join(', '),

@@ -8,6 +8,6 @@ describe('weightConverter', () => {
         const interpretation = interpretter.interpret(
             'convert one pound to ounces')
         expect(interpretation.getOutputMessage()).
-            toContain('16 ounces blah')
+            toContain('16 ounces')
     })
 })
