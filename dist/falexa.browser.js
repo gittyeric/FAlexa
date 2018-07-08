@@ -51,14 +51,10 @@ const notes = require("./phonetic/examples/note/cmd");
 const timers = require("./phonetic/examples/timer/cmd");
 const calculator = require("./phonetic/examples/calculator/cmd");
 const weightConverter = require("./phonetic/examples/weightConverter/cmd");
+tslib_1.__exportStar(require("./falexa"), exports);
+tslib_1.__exportStar(require("./phonetic"), exports);
 exports.Speech = speech;
 exports.Recognition = recognition;
-var falexa_1 = require("./falexa");
-exports.createFalexa = falexa_1.createFalexa;
-exports.falexa = falexa_1.falexa;
-var interpretter_1 = require("./phonetic/interpretter");
-exports.newInterpretter = interpretter_1.newInterpretter;
-tslib_1.__exportStar(require("./phonetic"), exports);
 exports.Examples = {
     Timers: timers,
     Notes: notes,
@@ -66,7 +62,7 @@ exports.Examples = {
     WeightConverter: weightConverter,
 };
 
-},{"./falexa":2,"./io/recognition":4,"./io/speech":5,"./phonetic":12,"./phonetic/examples/calculator/cmd":6,"./phonetic/examples/note/cmd":7,"./phonetic/examples/timer/cmd":9,"./phonetic/examples/weightConverter/cmd":11,"./phonetic/interpretter":14,"tslib":94}],4:[function(require,module,exports){
+},{"./falexa":2,"./io/recognition":4,"./io/speech":5,"./phonetic":12,"./phonetic/examples/calculator/cmd":6,"./phonetic/examples/note/cmd":7,"./phonetic/examples/timer/cmd":9,"./phonetic/examples/weightConverter/cmd":11,"tslib":94}],4:[function(require,module,exports){
 "use strict";
 const getDefaultRecognition = () => {
     const RecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -310,12 +306,12 @@ exports.newNotes = () => {
 },{}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const skills_1 = require("./skills");
 const syntax_1 = require("../../syntax");
-const _1 = require("../../");
-var skills_2 = require("./skills");
-exports.startTimer = skills_2.startTimer;
-exports.stopTimer = skills_2.stopTimer;
+const __1 = require("../..");
+exports.startTimer = (require('./skills').startTimer);
+exports.stopTimer = (require('./skills').stopTimer);
+const getSecsRemaining = (require('./skills').getSecsRemaining);
+const getActiveTimerNames = (require('./skills').getActiveTimerNames);
 const timeUnitTranslator = {
     seconds: 'second',
     minutes: 'minute',
@@ -324,7 +320,27 @@ const timeUnitTranslator = {
     ours: 'hour',
 };
 const timerNames = ['time', 'timer', 'alarm', 'clock'];
-const createStartTimerCmd = (alarm) => {
+const getTimeInfoString = (name, useShorthand) => {
+    const secsRemaining = getSecsRemaining(name);
+    let unitMultiplier = 1;
+    let timeUnit = 'second';
+    let round = Math.floor;
+    if (secsRemaining > 90) {
+        unitMultiplier /= 60;
+        timeUnit = 'minute';
+    }
+    if (secsRemaining > 60 * 90) {
+        unitMultiplier /= 60;
+        timeUnit = 'hour';
+        round = (num) => parseFloat(num.toFixed(1));
+    }
+    const units = round(secsRemaining * unitMultiplier);
+    if (useShorthand) {
+        return `${name} ${units} ${timeUnit}${units === 1 ? '' : 's'}`;
+    }
+    return `${units} ${timeUnit}${units === 1 ? '' : 's'} remaining for ${name}`;
+};
+exports.createStartTimerCmd = (alarm) => {
     const syntax = [
         syntax_1.Require(syntax_1.Any(['start', 'set'])),
         syntax_1.Var('name', syntax_1.Exact(syntax_1.StopPhrase(timerNames))),
@@ -341,25 +357,52 @@ const createStartTimerCmd = (alarm) => {
         if (unit.startsWith('hour')) {
             multiplier *= 60 * 60;
         }
-        skills_1.startTimer(name, duration * multiplier, () => alarm(`timer ${name} ready, ${name}`));
+        exports.startTimer(name, duration * multiplier, () => alarm(`timer ${name} ready, ${name}`));
         return undefined;
     };
     const describe = ({ name, duration, timeUnit }) => `${name} for ${duration} ${timeUnit}`;
-    return _1.createCmd(syntax, runFunc, describe);
+    return __1.createCmd(syntax, runFunc, describe);
 };
-const createStopTimerCmd = () => _1.createCmd([
+exports.createStopTimerCmd = () => __1.createCmd([
     syntax_1.Require(syntax_1.Any(['stop', 'end'])),
     syntax_1.Var('name', syntax_1.Exact(syntax_1.StopPhrase(timerNames))),
 ], ({ name }) => {
-    skills_1.stopTimer(name);
+    exports.stopTimer(name);
     return undefined;
 }, ({ name }) => `${name} stopped`);
+exports.createTimerInfoCmd = () => {
+    const runFunc = ({ name }) => ({
+        outputMessage: getTimeInfoString(name, false),
+    });
+    const describe = (params) => getTimeInfoString(params.name, true);
+    return __1.createCmd([
+        syntax_1.Require(syntax_1.Any(['get', 'give', 'how much'])),
+        syntax_1.Require(syntax_1.Any([
+            'time remaining', 'time remains', 'time is remaining',
+            'time left', 'time is left'
+        ])),
+        syntax_1.Ignore(syntax_1.Any(['for'])),
+        syntax_1.Var('name', syntax_1.Sentence()),
+    ], runFunc, describe, __1.createCmdMatchSettings(false, true));
+};
+exports.createTimerStatsCmd = () => {
+    const runFunc = () => ({
+        outputMessage: getActiveTimerNames().map((timerName) => getTimeInfoString(timerName, true)).join(' '),
+    });
+    const describe = () => `list timer stats`;
+    return __1.createCmd([
+        syntax_1.Require(syntax_1.Any(['list', 'read', 'get'])),
+        syntax_1.Var('name', syntax_1.Any(['timer stats', 'timer status', 'timers'])),
+    ], runFunc, describe, __1.createCmdMatchSettings(false, true));
+};
 exports.createTimerCmds = (alarm) => [
-    createStartTimerCmd(alarm),
-    createStopTimerCmd(),
+    exports.createStartTimerCmd(alarm),
+    exports.createStopTimerCmd(),
+    exports.createTimerInfoCmd(),
+    exports.createTimerStatsCmd(),
 ];
 
-},{"../../":12,"../../syntax":19,"./skills":10}],10:[function(require,module,exports){
+},{"../..":12,"../../syntax":19,"./skills":10}],10:[function(require,module,exports){
 "use strict";
 const timers = {};
 const ensureStopped = (name) => {
@@ -383,9 +426,21 @@ const startTimer = (name, millis, callbackFunc) => {
 const stopTimer = (name) => {
     ensureStopped(name);
 };
+const getSecsRemaining = (name) => {
+    const timer = timers[name];
+    if (!timer) {
+        return Number.NaN;
+    }
+    return (timer.ending - (new Date()).getTime()) / 1000;
+};
+const getActiveTimerNames = () => {
+    return Object.keys(timers);
+};
 module.exports = {
     startTimer,
     stopTimer,
+    getSecsRemaining,
+    getActiveTimerNames,
 };
 
 },{}],11:[function(require,module,exports){
@@ -453,13 +508,14 @@ exports.createConvertWeightCmd = () => __1.createCmd([
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const syntax_1 = require("./syntax");
-exports.createCmdMatchSettings = (ignoreFuzzyMatches = false, autoRunIfFuzzy = false, alwaysAsk = false, maxFuzzyCmds = 2, maxFuzzyDirectives = 3, maxFuzzyFilterResults = 25) => ({
+exports.createCmdMatchSettings = (ignoreFuzzyMatches = false, autoRunIfFuzzy = false, alwaysAsk = false, maxFuzzyCmds = 2, maxFuzzyDirectives = 16, maxFuzzyFilterResults = 32, trimPrefixStopwords = false) => ({
     ignoreFuzzyMatches,
     autoRunIfFuzzy,
     alwaysAsk,
     maxFuzzyFilterResults,
     maxFuzzyDirectives,
     maxFuzzyCmds,
+    trimPrefixStopwords,
 });
 function createCmd(syntax, runFunc, describe, matchSettings) {
     return ({
@@ -478,10 +534,11 @@ exports.addActivationWord = (activationWords, cmds) => {
 };
 tslib_1.__exportStar(require("./syntax"), exports);
 tslib_1.__exportStar(require("./publicInterfaces"), exports);
+tslib_1.__exportStar(require("./text"), exports);
 var interpretter_1 = require("./interpretter");
 exports.newInterpretter = interpretter_1.newInterpretter;
 
-},{"./interpretter":14,"./publicInterfaces":16,"./syntax":19,"tslib":94}],13:[function(require,module,exports){
+},{"./interpretter":14,"./publicInterfaces":16,"./syntax":19,"./text":20,"tslib":94}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const _ = require("lodash");
@@ -549,15 +606,16 @@ const sort_1 = require("./sort");
 const text_1 = require("./text");
 const interactSkills_1 = require("./interactSkills");
 const lodash_1 = require("lodash");
+const stopwords_1 = require("./stopwords");
+const util_1 = require("util");
 function interpretDirective(directive, words, paramMap, settings) {
     const interpretAttempt = directive(words, lodash_1.cloneDeep(paramMap), settings.maxFuzzyFilterResults);
-    if (interpretAttempt.length === 0) {
-        const matchingStopwords = text_1.filterFirstStopwords(words, 1);
-        if (matchingStopwords.length > 0) {
-            const withoutStopwords = words.slice(matchingStopwords.length);
-            return interpretDirective(directive, withoutStopwords, lodash_1.cloneDeep(paramMap), settings)
-                .map((interpretation) => (Object.assign({}, interpretation, { filterInterpretation: Object.assign({}, interpretation.filterInterpretation, { consumed: interpretation.filterInterpretation.consumed + matchingStopwords.length }) })));
-        }
+    if (words.length > 1 && stopwords_1.stopwords.indexOf(words[0]) >= 0) {
+        return sort_1.trimd([
+            ...interpretAttempt,
+            ...interpretDirective(directive, words.slice(1), lodash_1.cloneDeep(paramMap), settings)
+                .map((interpretation) => (Object.assign({}, interpretation, { filterInterpretation: Object.assign({}, interpretation.filterInterpretation, { consumed: interpretation.filterInterpretation.consumed + 1 }) }))),
+        ], settings.maxFuzzyDirectives);
     }
     return sort_1.trimd(interpretAttempt, settings.maxFuzzyDirectives);
 }
@@ -619,16 +677,36 @@ function interpretSyntax(syntax, words, paramMap, settings, directivesSoFar) {
     const validInterpretations = nextDirectiveResults.filter((result) => result !== null);
     return sortAndFlatten(validInterpretations);
 }
-function deduplicateSyntaxInterpretations(syntaxInterpretations) {
+const paramAsString = (param) => util_1.isString(param) ? param : undefined;
+const getParamsFromSyntax = (interpretation) => interpretation[interpretation.length - 1].runParams;
+const getWordsCount = (paramMap) => Object.keys(paramMap)
+    .map((name) => paramAsString(paramMap[name]))
+    .filter((paramStr) => util_1.isString(paramStr))
+    .map((paramStr) => paramStr.split(' ').length)
+    .reduce((total, wordCount) => total + wordCount, 0);
+function deduplicateSyntaxInterpretations(syntaxInterpretations, trimPrefixStopwords) {
     const seenParamMaps = {};
-    return syntaxInterpretations.filter((interpretation) => {
-        const paramSignature = JSON.stringify(interpretation[interpretation.length - 1].runParams);
-        if (seenParamMaps[paramSignature] !== undefined) {
-            return false;
+    const seenNonStopwordHashes = {};
+    syntaxInterpretations.filter((interpretation) => {
+        const paramSignature = JSON.stringify(getParamsFromSyntax(interpretation));
+        const exists = seenParamMaps[paramSignature] !== undefined;
+        seenParamMaps[paramSignature] = interpretation;
+        return !exists;
+    })
+        .forEach((interpretation) => {
+        const params = getParamsFromSyntax(interpretation);
+        const stopAgnosticSignature = JSON.stringify(Object.keys(params)
+            .map((paramName) => paramAsString(params[paramName]))
+            .map((paramStr) => util_1.isString(paramStr) ? paramStr : '')
+            .map((paramStr) => text_1.trimFirstStopwords(paramStr.split(' '))));
+        const existing = seenNonStopwordHashes[stopAgnosticSignature];
+        const overwriteExisting = existing === undefined ||
+            (trimPrefixStopwords && getWordsCount(getParamsFromSyntax(existing)) > getWordsCount(params));
+        if (overwriteExisting) {
+            seenNonStopwordHashes[stopAgnosticSignature] = interpretation;
         }
-        seenParamMaps[paramSignature] = true;
-        return true;
     });
+    return Object.keys(seenNonStopwordHashes).map((hash) => seenNonStopwordHashes[hash]);
 }
 function interpretCmd(cmd, words) {
     const interprettedSyntaxes = interpretSyntax(cmd.syntax, words, {}, cmd.matchSettings, []);
@@ -642,10 +720,14 @@ function interpretCmd(cmd, words) {
     return {
         minPenalty,
         topInterpretations: interprettedSyntaxes === null ? [] :
-            deduplicateSyntaxInterpretations(interprettedSyntaxes),
+            deduplicateSyntaxInterpretations(interprettedSyntaxes, cmd.matchSettings.trimPrefixStopwords),
         cmd,
     };
 }
+const emptyCmdResponse = {
+    contextualCmds: [],
+    outputMessage: '',
+};
 function isCmdResponse(response) {
     return response.outputMessage !== undefined;
 }
@@ -658,7 +740,7 @@ function runCmd(cmd, runParams) {
         if (isCmdResponse(runResponse)) {
             return runResponse;
         }
-        if (isCmdListResponse(runResponse)) {
+        else if (isCmdListResponse(runResponse)) {
             return {
                 outputMessage: interactSkills_1.defaultCmdDescription({ cmd, runParams }) + ' done',
                 contextualCmds: runResponse,
@@ -712,10 +794,6 @@ function topCmdInterpretationsToRunnables(interpretations) {
         runParams: cmdInterpretationToRunParams(cmdInterpretation.topInterpretations[0]),
     }));
 }
-const emptyCmdResponse = {
-    contextualCmds: [],
-    outputMessage: '',
-};
 const interpretCmds = (cmds, words) => {
     const interpretationsByCmd = cmds.map((cmd) => interpretCmd(cmd, words));
     const exactInterpretationsByCmd = interpretationsByCmd.filter((interpretation) => interpretation.minPenalty === 0)
@@ -728,7 +806,7 @@ const interpretCmds = (cmds, words) => {
         topExactMatches.forEach((m) => {
             console.log(JSON.stringify(m.runParams));
         });
-        return interactSkills_1.createClarificationResponse(topExactMatches);
+        return Object.assign({}, interactSkills_1.createClarificationResponse(topExactMatches));
     }
     const fuzzyInterpretations = interpretationsByCmd.filter((cmdInterpretation) => !cmdInterpretation.cmd.matchSettings.ignoreFuzzyMatches && cmdInterpretation.minPenalty < Infinity);
     const topFuzzyMatches = topCmdInterpretationsToRunnables(fuzzyInterpretations);
@@ -740,7 +818,7 @@ const interpretCmds = (cmds, words) => {
     }
     return emptyCmdResponse;
 };
-const interpretPrioritizedCmds = (priorityCmds, cmds, txt) => {
+const interpretAllCmds = (priorityCmds, cmds, txt) => {
     const words = text_1.txtToValidWords(txt);
     const exactPriorityCmds = priorityCmds.map((cmd) => (Object.assign({}, cmd, { matchSettings: Object.assign({}, cmd.matchSettings, { ignoreFuzzyMatches: true }) })));
     const exactPrioritizedResults = interpretCmds(exactPriorityCmds, words);
@@ -760,23 +838,45 @@ const createDefaultPrioritizedCmds = (lastInterpretation) => {
         interactSkills_1.createRepeatCmd(getOutputMessage(lastInterpretation)),
     ];
 };
-const _newInterpretter = (cmds, prioritizedCmds = [], interpretation) => ({
-    getOutputMessage() {
-        return getOutputMessage(interpretation);
-    },
-    getContextualCmds() { return [...prioritizedCmds]; },
-    interpret(txt) {
-        const nextInterpretation = interpretPrioritizedCmds(prioritizedCmds, cmds, txt);
-        const nextContextualCmds = [
-            ...(nextInterpretation.contextualCmds === undefined ? [] : nextInterpretation.contextualCmds),
-            ...createDefaultPrioritizedCmds(nextInterpretation),
-        ];
-        return _newInterpretter(cmds, nextContextualCmds, nextInterpretation);
-    },
-});
+const _newInterpretter = (cmds, prioritizedCmds = [], interpretation) => {
+    let curPrioritizedCmds = prioritizedCmds;
+    let curInterpretation = interpretation;
+    const bindFutureResponse = (asyncResponse) => {
+        if (asyncResponse.laterResponse !== undefined) {
+            asyncResponse.laterResponse.then((response) => {
+                curInterpretation = response;
+                if (response.contextualCmds !== undefined) {
+                    curPrioritizedCmds = response.contextualCmds;
+                }
+                else {
+                    curPrioritizedCmds = [];
+                }
+                bindFutureResponse(response);
+            })
+                .catch(() => { });
+        }
+    };
+    if (curInterpretation !== undefined) {
+        bindFutureResponse(curInterpretation);
+    }
+    return {
+        getOutputMessage() {
+            return getOutputMessage(curInterpretation);
+        },
+        getContextualCmds() { return [...curPrioritizedCmds]; },
+        interpret(txt) {
+            const nextInterpretation = interpretAllCmds(curPrioritizedCmds, cmds, txt);
+            const nextContextualCmds = [
+                ...(nextInterpretation.contextualCmds === undefined ? [] : nextInterpretation.contextualCmds),
+                ...createDefaultPrioritizedCmds(nextInterpretation),
+            ];
+            return _newInterpretter(cmds, nextContextualCmds, nextInterpretation);
+        },
+    };
+};
 exports.newInterpretter = (cmds) => _newInterpretter(cmds);
 
-},{"./interactSkills":13,"./sort":17,"./text":20,"lodash":91}],15:[function(require,module,exports){
+},{"./interactSkills":13,"./sort":17,"./stopwords":18,"./text":20,"lodash":91,"util":96}],15:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const words_to_numbers_1 = require("words-to-numbers");
@@ -875,7 +975,8 @@ function trim(filtered, convert) {
         trimmed.sort((a, b) => {
             const ap = convert(a);
             const bp = convert(b);
-            return ap.penalty === bp.penalty ? 0 :
+            return ap.penalty === bp.penalty ?
+                (ap.words.length === bp.words.length ? 0 : ap.words.length > bp.words.length ? -1 : 1) :
                 (ap.penalty > bp.penalty ? 1 : -1);
         });
         trimmed.slice(0, convert(possible[0]).maxResults);
@@ -1149,6 +1250,7 @@ exports.filterFirstStopwords = (words, maxReturned = Infinity) => {
     }
     return matchedStopwords;
 };
+exports.trimFirstStopwords = (words) => words.slice(exports.filterFirstStopwords(words).length);
 exports.matchWordsToPhrase = (words, phrase) => {
     const wordCount = phrase.split(' ').length;
     const matched = [];

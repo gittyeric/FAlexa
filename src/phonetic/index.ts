@@ -8,8 +8,9 @@ export const createCmdMatchSettings = (
     alwaysAsk: boolean = false, // Confirm running even if it seems to match perfect, good for dangerous operations
 
     maxFuzzyCmds: number = 2, // Max number of command syntax interpretations to offer if multiple match
-    maxFuzzyDirectives: number = 3, // A higher number considers more directive interpretations and maybe better results
-    maxFuzzyFilterResults: number = 25, // A higher number considers more fuzzy filter matches and maybe better results
+    maxFuzzyDirectives: number = 16, // A higher number considers more directive interpretations and maybe better results
+    maxFuzzyFilterResults: number = 32, // A higher number considers more fuzzy filter matches and maybe better results
+    trimPrefixStopwords: boolean = false, // Whether to strip words up to the first non-stopword in matches
 ): CmdMatchSettings => ({
     ignoreFuzzyMatches,
     autoRunIfFuzzy,
@@ -18,6 +19,7 @@ export const createCmdMatchSettings = (
     maxFuzzyFilterResults,
     maxFuzzyDirectives,
     maxFuzzyCmds,
+    trimPrefixStopwords,
 })
 
 // Create a command to map a syntax interpretation to your Javascript function
@@ -45,4 +47,5 @@ export const addActivationWord = (activationWords: string[], cmds: Cmd<ParamMap>
 
 export * from './syntax';
 export * from './publicInterfaces';
+export * from './text';
 export { newInterpretter, Interpretter } from './interpretter';

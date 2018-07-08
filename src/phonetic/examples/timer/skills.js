@@ -24,7 +24,7 @@ const stopTimer = (name) => {
     ensureStopped(name);
 };
 
-/*export const getSecsRemaining = (name) => {
+const getSecsRemaining = (name) => {
     const timer = timers[name];
     if (!timer) {
         return Number.NaN;
@@ -32,11 +32,13 @@ const stopTimer = (name) => {
     return (timer.ending - (new Date()).getTime()) / 1000;
 };
 
-export const getTimerStats = () => {
-    return Object.keys(timers).map(name => getSecsRemaining(name));
-};*/
+const getActiveTimerNames = () => {
+    return Object.keys(timers);
+};
 
 module.exports = {
     startTimer,
     stopTimer,
+    getSecsRemaining,
+    getActiveTimerNames,
 };
