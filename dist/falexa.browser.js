@@ -13,6 +13,10 @@ const newRecognizerFactory = require('./io/recognition').newRecognizerFactory;
 const getDefaultRecognition = require('./io/recognition').getDefaultRecognition;
 exports.createFalexa = (cmds, speaker, sentenceSource, debugLogger) => {
     let interpretter = interpretter_1.newInterpretter(cmds);
+    let stopHandlers = [];
+    sentenceSource.onend = () => {
+        stopHandlers.forEach((handler) => handler());
+    };
     const sentenceHandler = (sentencePossibilities) => {
         debugLogger(`Heard '${sentencePossibilities[0]}'`);
         interpretter = interpretter.interpret(sentencePossibilities[0]);
@@ -34,6 +38,12 @@ exports.createFalexa = (cmds, speaker, sentenceSource, debugLogger) => {
         },
         stopListening() {
             recognizer.stop();
+        },
+        onListenStop(handler) {
+            stopHandlers.push(handler);
+        },
+        offListenStop(handler) {
+            stopHandlers = stopHandlers.filter((h) => h !== handler);
         },
     };
 };
@@ -491,7 +501,9 @@ const getConvertedOutputMessage = ({ amount, inputUnit, outputUnit }) => {
         inputUnit: toTrueUnit[inputUnit],
         outputUnit: toTrueUnit[outputUnit],
     };
-    const converted = convertWeightUnit(absParams).toFixed(2);
+    const converted = convertWeightUnit(absParams).toFixed(2)
+        .replace(/\.(\d)0/, '.$1')
+        .replace('.0', '');
     return `${converted} ${toVerbalMap[absParams.outputUnit]} equal ${amount} ${toVerbalMap[absParams.inputUnit]}`;
 };
 exports.createConvertWeightCmd = () => __1.createCmd([

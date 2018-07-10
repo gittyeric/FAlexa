@@ -3,6 +3,7 @@ import { Cmd, ParamMap } from '../phonetic';
 
 export const createMockSentenceSource: () => SentenceSource = () => {
     return {
+        onend: () => undefined,
         start(): void {},
         stop(): void {},
         startListening(): void {},

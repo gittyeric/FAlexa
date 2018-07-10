@@ -24,9 +24,9 @@ var runFunc = (paramMap) => ({
 
 // Create the syntax that the sentence must match to, an array of directives with filters
 var matchSyntax = [
-    Require(Any(['multiply'])), // First word must be 'multiply'
+    Require(Any(['multiply'])), // First word must sound like 'multiply'
     Var('arg1', Numeric()),     // Next phrase must be numeric like 'twenty one'
-    Require(Any(['and', 'with', 'times'])),
+    Require(Any(['and', 'with', 'times'])), // Require 1 of these words
     Var('arg2', Numeric()),
 ];
 
@@ -95,11 +95,15 @@ Most filters do fuzzy matching, where phonetically similar words are considered 
 
 Your command's syntax is order-based and composed of "Directives", which typically map to a parameter in your Javascript function.  Each directive has one or more filters to refine matching.  There are 4 types:
 
+
 <b>Var(name, filter)</b>: The filter must match, and the filtered result will be saved with variable name "name" which will show up in your custom function parameter list.
+
 
 <b>Option(name, defaultValue, filter)</b>: Like a Var Directive, but can be skipped if the filter doesn't match to the remaining words, in which case defaultValue will be used instead without consuming input words.
 
+
 <b>Require(filter)</b>: Like a Var Directive, but ignore the filtered value after consuming one or more words.
+
 
 <b>Ignore(filter)</b>: Like Option, but ignore the filtered value.  Used to consume optional words that might exist, usually to keep them from showing up in the next directive.
 
@@ -148,6 +152,9 @@ Assume the minimum penalty across each words / VarType duplicate interpretation
 
 
 <b>And</b>(filters: Filter[]): Give back only the interpretations that match words across all filters, and assume the worst penalty over all the filtered outputs across each interpretation
+
+
+<b>Exact</b>(filter: Filter): Remove fuzzy matches returned by the parent filter passed in
 
 ### Custom Filters
 

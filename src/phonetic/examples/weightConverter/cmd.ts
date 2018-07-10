@@ -60,6 +60,8 @@ const getConvertedOutputMessage = ({amount, inputUnit, outputUnit}: ConvertParam
         outputUnit: toTrueUnit[outputUnit],
     };
     const converted = convertWeightUnit(absParams).toFixed(2)
+        .replace(/\.(\d)0/, '.$1')
+        .replace('.0', '')
 
     return `${converted} ${toVerbalMap[absParams.outputUnit]} equal ${amount} ${toVerbalMap[absParams.inputUnit]}`
 };

@@ -7,6 +7,7 @@ type SentencesHandler = (sentencePossibilities: string[]) => void
 // Something that generates an array of possible sentence interpretations,
 // generally intended for the browser's SpeechRecognition instance
 export interface SentenceSource {
+    onend: (() => void),
     start(): void,
     stop(): void,
     startListening(): void,
@@ -26,6 +27,8 @@ export interface FAlexa {
     hear(sentencePossibilities: string[]): string,
     startListening(): void,
     stopListening(): void,
+    onListenStop(handler: () => void): void,
+    offListenStop(handler: () => void): void,
 }
 
 export const createFalexa = (cmds: Cmd<ParamMap>[],
@@ -34,8 +37,14 @@ export const createFalexa = (cmds: Cmd<ParamMap>[],
     sentenceSource: SentenceSource,
     debugLogger: (msg: string) => void): FAlexa => {
 
-    // Setup interpretter
+    // Setup interpretter & mutable state
     let interpretter = newInterpretter(cmds)
+    let stopHandlers: (() => void)[] = []
+
+    // Setup recognition end master handler
+    sentenceSource.onend = () => {
+        stopHandlers.forEach((handler: () => void) => handler())
+    }
 
     // Setup voice recognition
     const sentenceHandler: SentencesHandler = (sentencePossibilities: string[]) => {
@@ -60,6 +69,12 @@ export const createFalexa = (cmds: Cmd<ParamMap>[],
         },
         stopListening(): void {
             recognizer.stop()
+        },
+        onListenStop(handler: () => void): void {
+            stopHandlers.push(handler)
+        },
+        offListenStop(handler: () => void): void {
+            stopHandlers = stopHandlers.filter((h: () => void) => h !== handler)
         },
     }
 }
