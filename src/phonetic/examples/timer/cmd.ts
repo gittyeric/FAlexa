@@ -22,12 +22,12 @@ const timeUnitTranslator = {
 } as TimeUnitTranslater
 
 // Cmd run parameter types
-interface TimerStartParams extends ParamMap { 
+export interface TimerStartParams extends ParamMap { 
     name: string, 
     duration: number, 
     timeUnit: string
 }
-interface TimerNameParam extends ParamMap {
+export interface TimerNameParam extends ParamMap {
     name: string,
 }
 

@@ -30,7 +30,7 @@ export const trimFirstStopwords = (words: string[]) =>
 
 export const matchWordsToPhrase = (words: string[], phrase: string): string[] => {
     const wordCount = phrase.split(' ').length
-    const matched = []
+    const matched: string[] = []
     for (let w = 0; w < wordCount && w < words.length; w++) {
         matched.push(words[w])
     }

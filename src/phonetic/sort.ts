@@ -2,12 +2,12 @@ import { FilterInterpretations, FilterInterpretation, DirectiveInterpretation } 
     import { ParamMap } from './publicInterfaces';
 
 // Sort and trim results from based on penalty
-interface Penalizable {
+export interface Penalizable {
     penalty: number,
     maxResults: number,
     words: string[],
 }
-type ToPenalizable<INPUT> = (convertable: INPUT) => Penalizable
+export type ToPenalizable<INPUT> = (convertable: INPUT) => Penalizable
 
 export function trim<P>(filtered: P[], convert: ToPenalizable<P>): P[] {
     const possible = filtered.filter((interpretation: P) =>

@@ -3,12 +3,23 @@
   "version": "1.1.0",
   "description": "Create your own verbal commands that map to custom Javascript functions",
   "engineStrict": true,
+  "main": "index.js",
   "types": "./src/index",
   "engines": {
     "node": ">= 8.9.0"
   },
   "keywords": [
-    "alexa", "alexa-skill", "jarvis", "speech", "recognition", "voice", "synthesis", "verbal", "command", "fuzzy", "regex"
+    "alexa",
+    "alexa-skill",
+    "jarvis",
+    "speech",
+    "recognition",
+    "voice",
+    "synthesis",
+    "verbal",
+    "command",
+    "fuzzy",
+    "regex"
   ],
   "repository": {
     "type": "git",

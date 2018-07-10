@@ -16,7 +16,7 @@ const numberSynonyms: SynonymMap = {
 const numericSynonymMap: SynonymMap = { ...negativeSynonyms, ...dotSynonyms, ...numberSynonyms }
 const numericStopwords: SynonymMap = {and: 'and'}
 
-interface ParsedNumber {
+export interface ParsedNumber {
     value: number, // The number parsed, or NaN if no number was found
     consumed: number, // How many words removed (or ignored) from input array to create this number
 }

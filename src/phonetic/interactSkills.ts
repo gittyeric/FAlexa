@@ -5,9 +5,9 @@ import { ParamMap, Cmd, RunResponse, CmdResponse } from './publicInterfaces';
 import { RunnableCmd } from './moduleInterfaces';
 import { isNullOrUndefined } from 'util';
 
-type YesParams = ParamMap
-type NoParams = ParamMap
-interface NumericResponseParams extends ParamMap {
+export type YesParams = ParamMap
+export type NoParams = ParamMap
+export interface NumericResponseParams extends ParamMap {
     response: number,
 }
 

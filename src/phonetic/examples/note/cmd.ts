@@ -77,7 +77,7 @@ export const createNoteCmds = (notes: Notes): Cmd<ParamMap>[] => [
 
 // ---------------------------- Log stack Commands --------------------------------
 
-interface LogParams extends ParamMap{
+export interface LogParams extends ParamMap{
     message: string,
 }
 

@@ -1,7 +1,7 @@
-import { Cmd, ParamMap, Directive } from '../../../src/phonetic/publicInterfaces';
 import { createCmd } from '../../../src/phonetic';
+import { Cmd, Directive, ParamMap } from '../../../src/phonetic/publicInterfaces';
 
-interface MockCmdParams extends ParamMap {
+export interface MockCmdParams extends ParamMap {
     strVal1?: string,
     strVal2?: string,
     numVal1?: number,
