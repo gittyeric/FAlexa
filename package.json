@@ -1,10 +1,10 @@
 {
   "name": "falexa",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Create your own verbal commands that map to custom Javascript functions",
   "engineStrict": true,
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "engines": {
     "node": ">= 8.9.0"
   },
@@ -41,9 +41,10 @@
   },
   "scripts": {
     "clean": "rimraf coverage build tmp dist",
-    "build": "npm run build:ts && npm run build:browserify && npm run build:min",
-    "build:ts": "tsc -p tsconfig.release.json",
-    "build:browserify": "cd ./build && browserify ./src/browser.js --standalone Falexa -o ../dist/falexa.browser.js",
+    "build": "npm run build:ts-js && npm run build:ts-types && npm run build:browserify && npm run build:min",
+    "build:ts-js": "tsc -p tsconfig.json",
+    "build:ts-types": "tsc -p tsconfig.release.json",
+    "build:browserify": "cd ./lib && browserify ./src/browser.js --standalone Falexa -o ../dist/falexa.browser.js",
     "build:min": "uglifyjs ./dist/falexa.browser.js -o ./dist/falexa.browser.min.js --compress",
     "deploy-dry": "npm run build & npm run lint & npm run test && git status",
     "watch": "tsc -w -p tsconfig.release.json",

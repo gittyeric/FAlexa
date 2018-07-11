@@ -1,8 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es5",
+    "lib": ["es2017", "es7", "es6", "dom"],
     "module": "commonjs",
-    "declaration": true,
+    "allowJs": true,
+    "rootDir": ".",
+    "outDir": "lib",
+    "removeComments": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "importHelpers": true,
