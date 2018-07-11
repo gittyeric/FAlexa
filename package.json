@@ -1,6 +1,6 @@
 {
   "name": "falexa",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "Create your own verbal commands that map to custom Javascript functions",
   "engineStrict": true,
   "main": "lib/index.js",
