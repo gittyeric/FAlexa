@@ -122,12 +122,11 @@ var newRecognizerFactory = function (recognition) {
                 recognition.stop();
             }
             isListening = false;
-            recognition.onresult = function () { return false; };
         };
         var abort = function () {
+            recognition.onresult = function () { return false; };
             if (isListening) {
                 recognition.abort();
-                isListening = false;
             }
             stop();
         };

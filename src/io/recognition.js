@@ -54,15 +54,14 @@ const newRecognizerFactory = (recognition = getDefaultRecognition()) => {
             if (isListening) {
                 recognition.stop()
             }
-            // endListeningHandler();
 
             isListening = false
-            recognition.onresult = () => false
+            // recognition.onresult = () => false
         }
         const abort = () => {
+            recognition.onresult = () => false
             if (isListening){
                 recognition.abort()
-                isListening = false
             }
             stop()
         }
