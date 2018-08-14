@@ -1,74 +1,92 @@
 import { newInterpretter } from './phonetic/interpretter'
 import { ParamMap, Cmd } from '.';
+import { Speaker, defaultSpeaker } from './io/speech';
 
-type Speaker = (toSay: string) => void
 type SentencesHandler = (sentencePossibilities: string[]) => void
 
+// A cheap substitute for missing SpeechRecognition API type
+// (should replace after support is added)
+interface Recognition {
+    start(): void,
+    stop(): void,
+    abort(): void,
+    onend(): void,
+}
+
 // Something that generates an array of possible sentence interpretations,
-// generally intended for the browser's SpeechRecognition instance
+// generally intended to wrap the browser's SpeechRecognition instance
 export interface SentenceSource {
     onend: (() => void),
     start(): void,
     stop(): void,
-    startListening(): void,
-    stopListening(): void,
+    abort(): void,
+    onEnd(endHandler: () => void): void,
+    isListening(): boolean,
 }
 
-// tslint:disable-next-line:no-any no-unsafe-any no-require-imports
-const defaultSpeaker = (<() => Speaker>require('./io/speech').defaultSpeaker)
+// Forcibly typed io/recognition imports
+
 const newRecognizerFactory =
     // tslint:disable-next-line:no-require-imports no-unsafe-any no-any
-    (<(source: SentenceSource) => (handler: SentencesHandler) => SentenceSource> require('./io/recognition').newRecognizerFactory)
+    (<(recognizer: Recognition) => (handler: SentencesHandler) => SentenceSource> require('./io/recognition').newRecognizerFactory)
 // tslint:disable-next-line:no-require-imports no-any no-unsafe-any
-const getDefaultRecognition = (<() => SentenceSource> require('./io/recognition').getDefaultRecognition);
+const getDefaultRecognition = (<() => Recognition> require('./io/recognition').getDefaultRecognition);
 
+interface Unlistener {
+    stop(): void,
+    abort(): void,
+    isListening(): void,
+    onEnd(): void,
+}
 export interface FAlexa {
     speak(toSay: string): void,
     hear(sentencePossibilities: string[]): string,
-    startListening(): void,
-    stopListening(): void,
+    listen(recognition: Recognition | undefined): Unlistener,
     onListenStop(handler: () => void): void,
     offListenStop(handler: () => void): void,
 }
 
+// Programmatic & test-friendly constructor
 export const createFalexa = (cmds: Cmd<ParamMap>[],
-    speaker: (toSay: string) => void,
-    // tslint:disable-next-line:no-any
-    sentenceSource: SentenceSource,
-    debugLogger: (msg: string) => void): FAlexa => {
+    speaker: (toSay: string) => void = console.log,
+    debugLogger: (msg: string) => void = console.log): FAlexa => {
 
     // Setup interpretter & mutable state
     let interpretter = newInterpretter(cmds)
     let stopHandlers: (() => void)[] = []
 
-    // Setup recognition end master handler
-    sentenceSource.onend = () => {
-        stopHandlers.forEach((handler: () => void) => handler())
-    }
-
     // Setup voice recognition
     const sentenceHandler: SentencesHandler = (sentencePossibilities: string[]) => {
-        debugLogger(`Heard '${sentencePossibilities[0]}'`)
+        debugLogger(`HEARD: '${sentencePossibilities[0]}'`)
         interpretter = interpretter.interpret(sentencePossibilities[0])
-        debugLogger(`"${interpretter.getOutputMessage()}"`)
+        debugLogger(`SPEAK: "${interpretter.getOutputMessage()}"`)
         speaker(interpretter.getOutputMessage())
     }
-    const recognizer = newRecognizerFactory(sentenceSource)(sentenceHandler)
 
     return {
         speak(toSay: string): void {
-            debugLogger(`"${toSay}"`)
+            debugLogger(`FORCE: "${toSay}"`)
             speaker(toSay)
         },
         hear(sentences: string[]): string {
             sentenceHandler(sentences)
             return interpretter.getOutputMessage()
         },
-        startListening(): void {
+        listen(recognition: Recognition | undefined): Unlistener {
+            // Setup recognition end master handler
+            const validRecognition = recognition !== undefined ?
+                recognition :
+                getDefaultRecognition()
+            validRecognition.onend = () => {
+                stopHandlers.forEach((handler: () => void) => handler())
+            }
+
+            // Abort any existing recognition listening
+            validRecognition.abort()
+
+            const recognizer = newRecognizerFactory(validRecognition)(sentenceHandler)
             recognizer.start()
-        },
-        stopListening(): void {
-            recognizer.stop()
+            return recognizer
         },
         onListenStop(handler: () => void): void {
             stopHandlers.push(handler)
@@ -79,8 +97,10 @@ export const createFalexa = (cmds: Cmd<ParamMap>[],
     }
 }
 
+// Web Frontend-friendly constructor
 export const falexa = (
     cmds: Cmd<ParamMap>[], 
-    speaker: Speaker = defaultSpeaker()): FAlexa => {
-    return createFalexa(cmds, speaker, getDefaultRecognition(), console.log)
+    speaker: Speaker = defaultSpeaker(),
+    debugLogger: (msg: string) => void = console.log): FAlexa => {
+    return createFalexa(cmds, speaker, debugLogger)
 }

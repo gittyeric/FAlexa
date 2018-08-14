@@ -1,4 +1,9 @@
+let _defaultRecognition = null;
 const getDefaultRecognition = () => {
+    if (_defaultRecognition) {
+        return _defaultRecognition;
+    }
+
     const RecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new RecognitionClass();
 
@@ -8,13 +13,16 @@ const getDefaultRecognition = () => {
     recognition.maxAlternatives = 3;
     recognition.continuous = false;
 
+    _defaultRecognition = recognition;
     return recognition;
 }
 
 // Returns a function that, when called during a user mouse/keyboard event, will start voice recognition
 // incomingSentencesHandler will be called with an array of possible sentences whenever recognized
 const newRecognizerFactory = (recognition = getDefaultRecognition()) => {
+    let isListening = false
     return (incomingSentencesHandler) => {
+        let endListeningHandler = () => {}
         const resultHandler = (event) => {
             // The SpeechRecognitionEvent results property returns a SpeechRecognitionResultList object
             // The SpeechRecognitionResultList object contains SpeechRecognitionResult objects.
@@ -31,31 +39,43 @@ const newRecognizerFactory = (recognition = getDefaultRecognition()) => {
                 console.log(`Got ${event.results[curIndex][i].transcript}`)
             }
             incomingSentencesHandler(sentences.filter(s => !!s));
+            endListeningHandler();
         }
 
-        const startListening = () => {
-            recognition.onresult = resultHandler
-        }
-        const stopListening = () => {
-            recognition.onresult = () => false
-        }
         const start = () => {
-            startListening()
+            isListening = true
+            recognition.onresult = resultHandler
             recognition.start()
         }
         const stop = () => {
-            stopListening()
-            recognition.stop()
+            if (isListening) {
+                recognition.stop()
+            }
+            else {
+                endListeningHandler();
+            }
+
+            isListening = false
+            recognition.onresult = () => false
+        }
+        const abort = () => {
+            if (isListening){
+                recognition.abort()
+                isListening = false
+            }
+            stop()
         }
 
         return {
             start, 
             stop, 
-            startListening, 
-            stopListening
+            abort,
+            isListening: () => isListening,
+            onEnd: (endHandler) => 
+                endListeningHandler = endHandler
         }
     }
-};
+}
 
 module.exports = {
     getDefaultRecognition,

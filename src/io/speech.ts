@@ -1,8 +1,10 @@
+export type Speaker = (toSay: string) => void
+
 // tslint:disable-next-line:no-any
 const getSynth: () => SpeechSynthesis = () => window !== undefined ? window.speechSynthesis : {} as SpeechSynthesis
 
 // tslint:disable-next-line:no-any
-const speak = (synthesis: SpeechSynthesis, txt: string, voice: SpeechSynthesisVoice, pitch: number, rate: number) => {
+const speak = (synthesis: SpeechSynthesis, txt: string, voice: SpeechSynthesisVoice, pitch: number, rate: number): void => {
     if (synthesis.speaking) {
         synthesis.cancel();
     }
@@ -18,9 +20,9 @@ export const getDefaultVoice = (): SpeechSynthesisVoice => {
 }
 
 // tslint:disable-next-line:no-any
-export const speakerFactory = (voice: SpeechSynthesisVoice, pitch: number, rate: number) =>
+export const speakerFactory = (voice: SpeechSynthesisVoice, pitch: number, rate: number): Speaker =>
     (txt: string) =>
         speak(getSynth(), txt, voice, pitch, rate)
 
-export const defaultSpeaker = () =>
+export const defaultSpeaker = (): Speaker =>
     speakerFactory(getDefaultVoice(), 1.8, 1)
