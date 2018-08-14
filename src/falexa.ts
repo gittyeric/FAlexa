@@ -6,7 +6,7 @@ type SentencesHandler = (sentencePossibilities: string[]) => void
 
 // A cheap substitute for missing SpeechRecognition API type
 // (should replace after support is added)
-interface Recognition {
+export interface Recognition {
     start(): void,
     stop(): void,
     abort(): void,
@@ -32,11 +32,11 @@ const newRecognizerFactory =
 // tslint:disable-next-line:no-require-imports no-any no-unsafe-any
 const getDefaultRecognition = (<() => Recognition> require('./io/recognition').getDefaultRecognition);
 
-interface Unlistener {
+export interface Unlistener {
     stop(): void,
     abort(): void,
     isListening(): void,
-    onEnd(): void,
+    onEnd(endHandler: () => void): void,
 }
 export interface FAlexa {
     speak(toSay: string): void,
