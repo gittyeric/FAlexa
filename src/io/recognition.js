@@ -39,6 +39,9 @@ const newRecognizerFactory = (recognition = getDefaultRecognition()) => {
                 console.log(`Got ${event.results[curIndex][i].transcript}`)
             }
             incomingSentencesHandler(sentences.filter(s => !!s));
+        }
+        recognition.onend = () => {
+            isListening = false
             endListeningHandler();
         }
 
@@ -51,9 +54,7 @@ const newRecognizerFactory = (recognition = getDefaultRecognition()) => {
             if (isListening) {
                 recognition.stop()
             }
-            else {
-                endListeningHandler();
-            }
+            // endListeningHandler();
 
             isListening = false
             recognition.onresult = () => false
@@ -71,8 +72,9 @@ const newRecognizerFactory = (recognition = getDefaultRecognition()) => {
             stop, 
             abort,
             isListening: () => isListening,
-            onEnd: (endHandler) => 
+            onEnd: (endHandler) => {
                 endListeningHandler = endHandler
+            },
         }
     }
 }

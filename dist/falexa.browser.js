@@ -107,6 +107,9 @@ var newRecognizerFactory = function (recognition) {
                 console.log("Got " + event.results[curIndex][i].transcript);
             }
             incomingSentencesHandler(sentences.filter(function (s) { return !!s; }));
+        };
+        recognition.onend = function () {
+            isListening = false;
             endListeningHandler();
         };
         var start = function () {
@@ -117,9 +120,6 @@ var newRecognizerFactory = function (recognition) {
         var stop = function () {
             if (isListening) {
                 recognition.stop();
-            }
-            else {
-                endListeningHandler();
             }
             isListening = false;
             recognition.onresult = function () { return false; };
@@ -137,8 +137,8 @@ var newRecognizerFactory = function (recognition) {
             abort: abort,
             isListening: function () { return isListening; },
             onEnd: function (endHandler) {
-                return endListeningHandler = endHandler;
-            }
+                endListeningHandler = endHandler;
+            },
         };
     };
 };
