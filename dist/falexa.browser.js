@@ -450,6 +450,23 @@ exports.createStartTimerCmd = function (alarm) {
     };
     return __1.createCmd(syntax, runFunc, describe);
 };
+var getTimeStr = function () {
+    return (new Date())
+        .toLocaleTimeString()
+        .split(' ')[0]
+        .replace(':', ' ');
+};
+exports.createGetTimeCmd = function () {
+    return __1.createCmd([
+        syntax_1.Require(syntax_1.Any([
+            'get time',
+            'what time is it',
+            'what\'s the time',
+        ])),
+    ], function () { return ({
+        outputMessage: getTimeStr(),
+    }); }, function () { return getTimeStr(); }, __1.createCmdMatchSettings(false, true));
+};
 exports.createStopTimerCmd = function () {
     return __1.createCmd([
         syntax_1.Require(syntax_1.Any(['stop', 'end'])),
@@ -496,6 +513,7 @@ exports.createTimerStatsCmd = function () {
     ], runFunc, describe, __1.createCmdMatchSettings(false, true));
 };
 exports.createTimerCmds = function (alarm) { return [
+    exports.createGetTimeCmd(),
     exports.createStartTimerCmd(alarm),
     exports.createStopTimerCmd(),
     exports.createTimerInfoCmd(),

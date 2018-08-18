@@ -1,6 +1,7 @@
-import { ParamMap, Cmd } from '../../publicInterfaces';
+import { ParamMap, Cmd, RunResponse } from '../../publicInterfaces';
 import { Require, Any, Var, Numeric, StopPhrase, Ignore, Exact, Sentence } from '../../syntax';
 import { createCmdMatchSettings, createCmd } from '../..';
+import { NoParams } from '../../interactSkills';
 
 // tslint:disable-next-line:no-require-imports no-unsafe-any
 export const startTimer = <(name: string, durationMs: number, alert: () => void) => void>(require('./skills').startTimer);
@@ -83,6 +84,28 @@ export const createStartTimerCmd = (alarm: (alertMsg: string) => void): Cmd<Time
     return createCmd(syntax, runFunc, describe)
 }
 
+const getTimeStr = () => 
+    (new Date())
+        .toLocaleTimeString()
+        .split(' ')[0]
+        .replace(':', ' ')
+
+export const createGetTimeCmd = (): Cmd<NoParams> => 
+    createCmd<NoParams>(
+        [
+            Require(Any([
+                'get time', 
+                'what time is it',
+                'what\'s the time',
+            ])),
+        ], 
+        (): RunResponse => ({
+            outputMessage: getTimeStr(),
+        }),
+        () => getTimeStr(),
+        createCmdMatchSettings(false, true),
+    )
+
 export const createStopTimerCmd = (): Cmd<TimerNameParam> => 
     createCmd<TimerNameParam>([
             Require(Any(['stop', 'end'])),
@@ -129,6 +152,7 @@ export const createTimerStatsCmd = (): Cmd<TimerNameParam> => {
 }
 
 export const createTimerCmds = (alarm: (alertMsg: string) => void): Cmd<ParamMap>[] => [
+    createGetTimeCmd(),
     createStartTimerCmd(alarm),
     createStopTimerCmd(),
     createTimerInfoCmd(),
