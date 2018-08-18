@@ -37,7 +37,7 @@ var multiplyCmd = createCmd(matchSyntax, runFunc);
 var multiplierBot = falexa( [multiplyCmd] );
 
 // In some mouse or keyboard event handler, start falexa and the microphone!
-multiplierBot.startListening();
+multiplierBot.listen();
 ```
 
 ## Frontend Installation
