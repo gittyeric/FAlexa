@@ -248,6 +248,7 @@ const numericFilter = (minNumber: number, maxNumber: number, preFilter: Filter):
             const parsedNumber = wordsToParsedNumber(interpretation.words)
 
             if (isFinite(parsedNumber.value) &&
+                !isNaN(parsedNumber.value) &&
                 parsedNumber.value >= minNumber &&
                 parsedNumber.value <= maxNumber) {
                 return {
