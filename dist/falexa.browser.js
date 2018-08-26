@@ -1347,6 +1347,7 @@ var numericFilter = function (minNumber, maxNumber, preFilter) {
         return preFilter(filteredInput).map(function (interpretation) {
             var parsedNumber = numeric_1.wordsToParsedNumber(interpretation.words);
             if (isFinite(parsedNumber.value) &&
+                !isNaN(parsedNumber.value) &&
                 parsedNumber.value >= minNumber &&
                 parsedNumber.value <= maxNumber) {
                 return tslib_1.__assign({}, interpretation, { words: ["" + parsedNumber.value], consumed: (interpretation.consumed + parsedNumber.consumed), varType: publicInterfaces_1.VarType.Numeric });
