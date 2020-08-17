@@ -1,6 +1,6 @@
 {
   "name": "falexa",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Create your own verbal commands that map to custom Javascript functions",
   "engineStrict": true,
   "main": "lib/src/index.js",
@@ -27,17 +27,18 @@
   },
   "devDependencies": {
     "@types/jest": "~22.2.3",
-    "@types/leven": "^2.1.1",
-    "@types/node": "~8.10.10",
-    "jest": "~22.4.3",
-    "rimraf": "~2.6.2",
-    "ts-jest": "~22.4.4",
+    "@types/leven": "^2.1.2",
+    "@types/lodash": "^4.14.159",
+    "@types/node": "^8.10.62",
+    "babel-jest": "^23.6.0",
+    "jest": "^22.4.4",
+    "rimraf": "^2.6.3",
+    "ts-jest": "^22.4.6",
     "tslint": "~5.9.1",
     "tslint-microsoft-contrib": "~5.0.3",
     "tsutils": "~2.26.2",
-    "typescript": "~2.8.3",
-    "uglifyjs": "^2.4.11",
-    "babel-jest": "^23.0.1"
+    "typescript": "^3.0.0",
+    "uglifyjs": "^2.4.11"
   },
   "scripts": {
     "clean": "rimraf coverage build tmp dist",
@@ -58,14 +59,13 @@
   "author": "Eric <git@letsmakeit.com>",
   "license": "APLv2",
   "dependencies": {
-    "@types/lodash": "^4.14.109",
-    "browserify": "^16.2.2",
+    "browserify": "^16.5.2",
     "leven": "^2.1.0",
-    "lodash": "^4.1.1",
-    "metaphone": "^1.0.3",
+    "lodash": "^4.17.20",
+    "metaphone": "^1.0.6",
     "talisman": "^0.20.0",
-    "tslib": "~1.9.0",
-    "uglify-es": "^3.3.9",
-    "words-to-numbers": "^1.4.1"
+    "tslib": "^2.0.1",
+    "uglify-es": "^3.3.10",
+    "words-to-numbers": "^1.5.1"
   }
 }
